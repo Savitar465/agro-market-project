@@ -337,6 +337,7 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
 
                                 {/* Cart & Sell */}
                                 <div className="ml-4 flex items-center gap-4 lg:ml-6">
+                                    <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
                                     <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
                                     <Link href="/cart" className="group -m-2 flex items-center p-2">
                                         <ShoppingBagIcon

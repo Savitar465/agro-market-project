@@ -2,11 +2,12 @@
 
 import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
-import {useState} from 'react'
+import {useState, use} from 'react'
 
-export default function Page({params}: { params: { id: string } }) {
+export default function Page({params}: { params: Promise<{ id: string }> }) {
+    const {id} = use(params)
     const {products, addToCart} = useStore()
-    const product = products.find(p => p.id === params.id)
+    const product = products.find(p => p.id === id)
     const router = useRouter()
     const [qty, setQty] = useState(1)
 
@@ -65,7 +66,14 @@ export default function Page({params}: { params: { id: string } }) {
                     {/* Options */}
                     <div className="mt-4 lg:row-span-3 lg:mt-0">
                         <h2 className="sr-only">Product information</h2>
-                        <p className="text-3xl tracking-tight text-gray-900">${product.price.toFixed(2)}</p>
+                        <div className="flex items-center justify-between">
+                            <p className="text-3xl tracking-tight text-gray-900">${product.price.toFixed(2)}</p>
+                            {product.stock !== undefined && (
+                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                                </span>
+                            )}
+                        </div>
 
                         <div className="mt-10">
                             <div className="flex items-center">
@@ -77,15 +85,17 @@ export default function Page({params}: { params: { id: string } }) {
                                     min="1"
                                     value={qty}
                                     onChange={(e) => setQty(parseInt(e.target.value))}
+                                    max={product.stock ?? 999}
                                     className="w-20 rounded border-gray-300 px-3 py-1.5 text-gray-900"
                                 />
                             </div>
 
                             <button
                                 onClick={handleAddToCart}
-                                className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                disabled={product.stock === 0}
+                                className={`mt-10 flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${product.stock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
                             >
-                                Add to bag
+                                {product.stock === 0 ? 'Out of stock' : 'Add to bag'}
                             </button>
                         </div>
                     </div>

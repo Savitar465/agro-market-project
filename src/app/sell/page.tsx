@@ -12,7 +12,7 @@ export default function Page() {
 
     const onSubmit = (data: Product) => {
         addProduct(data, 'default')
-        router.push('/store')
+        router.push('/inventory')
     }
 
     return (
@@ -82,6 +82,20 @@ export default function Page() {
                                     {categories.map(c => <option key={c}>{c}</option>)
                                     }
                                 </select>
+                            </div>
+                        </div>
+
+                        <div className="sm:col-span-3">
+                            <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
+                                Initial Stock
+                            </label>
+                            <div className="mt-1">
+                                <input
+                                    {...register('stock', {required: true, valueAsNumber: true})}
+                                    type="number"
+                                    id="stock"
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
                             </div>
                         </div>
 

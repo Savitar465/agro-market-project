@@ -9,6 +9,9 @@ export type CartItem = { id: string; qty: number };
 export type StoreState = {
   products: Product[];
   addProduct: (p: Product, sellerId: string) => void; // for /sell prototype
+  updateProduct: (p: Product) => void;
+  deleteProduct: (productId: string) => void;
+  updateStock: (productId: string, newStock: number) => void;
   sellers: Seller[];
   addSeller: (name: string) => void;
   cart: CartItem[];
@@ -16,6 +19,7 @@ export type StoreState = {
   removeFromCart: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clearCart: () => void;
+  checkout: () => void;
 };
 
 const StoreContext = createContext<StoreState | undefined>(undefined)
@@ -31,12 +35,31 @@ export function StoreProvider({children}: {children: React.ReactNode}) {
     setSellers(prev => prev.map(s => s.id === sellerId ? {...s, productIds: [...s.productIds, newProduct.id]} : s))
   }
 
+  const updateProduct = (p: Product) => {
+    setProducts(prev => prev.map(oldP => oldP.id === p.id ? p : oldP))
+  }
+
+  const deleteProduct = (productId: string) => {
+    setProducts(prev => prev.filter(p => p.id !== productId))
+    setCart(prev => prev.filter(item => item.id !== productId))
+  }
+
+  const updateStock = (productId: string, newStock: number) => {
+    setProducts(prev => prev.map(p => p.id === productId ? {...p, stock: newStock} : p))
+  }
+
   const addSeller = (name: string) => {
     const newSeller = {id: `${Date.now()}`, name, productIds: []};
     setSellers(prev => [newSeller, ...prev])
   }
 
   const addToCart = (id: string, qty: number = 1) => {
+    const product = products.find(p => p.id === id)
+    if (product && product.stock !== undefined && product.stock < qty) {
+      alert(`Only ${product.stock} items left in stock`)
+      return
+    }
+
     setCart(prev => {
       const existing = prev.find(i => i.id === id)
       if (existing) {
@@ -52,7 +75,18 @@ export function StoreProvider({children}: {children: React.ReactNode}) {
 
   const clearCart = () => setCart([])
 
-  const value = useMemo<StoreState>(() => ({products, addProduct, sellers, addSeller, cart, addToCart, removeFromCart, setQty, clearCart}), [products, sellers, cart])
+  const checkout = () => {
+    setProducts(prevProducts => prevProducts.map(p => {
+      const cartItem = cart.find(item => item.id === p.id)
+      if (cartItem) {
+        return {...p, stock: (p.stock ?? 0) - cartItem.qty}
+      }
+      return p
+    }))
+    clearCart()
+  }
+
+  const value = useMemo<StoreState>(() => ({products, addProduct, updateProduct, deleteProduct, updateStock, sellers, addSeller, cart, addToCart, removeFromCart, setQty, clearCart, checkout}), [products, sellers, cart])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }

@@ -4,7 +4,7 @@ import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
 
 export default function Page() {
-    const {cart, products, clearCart} = useStore()
+    const {cart, products, checkout} = useStore()
     const router = useRouter()
 
     const cartProducts = cart.map(item => {
@@ -17,7 +17,7 @@ export default function Page() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         alert('Checkout successful!')
-        clearCart()
+        checkout()
         router.push('/store')
     }
 
