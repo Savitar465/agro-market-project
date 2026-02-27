@@ -30,14 +30,17 @@ export default function Page() {
                     <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
                         Email address
                     </label>
-                    <div className="mt-1">
+                    <div className="mt-2">
+                        <div
+                            className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                         <input
                             type="email"
                             id="email-address"
                             name="email-address"
                             autoComplete="email"
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                         />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -50,14 +53,17 @@ export default function Page() {
                         <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">
                             First name
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
+                            <div
+                                className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                             <input
                                 type="text"
                                 id="first-name"
                                 name="first-name"
                                 autoComplete="given-name"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                             />
+                            </div>
                         </div>
                     </div>
 
@@ -65,14 +71,17 @@ export default function Page() {
                         <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">
                             Last name
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
+                            <div
+                                className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                             <input
                                 type="text"
                                 id="last-name"
                                 name="last-name"
                                 autoComplete="family-name"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                             />
+                            </div>
                         </div>
                     </div>
 
@@ -80,14 +89,17 @@ export default function Page() {
                         <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                             Address
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
+                            <div
+                                className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                             <input
                                 type="text"
                                 name="address"
                                 id="address"
                                 autoComplete="street-address"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                             />
+                            </div>
                         </div>
                     </div>
 
@@ -95,14 +107,17 @@ export default function Page() {
                         <label htmlFor="city" className="block text-sm font-medium text-gray-700">
                             City
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
+                            <div
+                                className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                             <input
                                 type="text"
                                 name="city"
                                 id="city"
                                 autoComplete="address-level2"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                             />
+                            </div>
                         </div>
                     </div>
 
@@ -110,14 +125,17 @@ export default function Page() {
                         <label htmlFor="postal-code" className="block text-sm font-medium text-gray-700">
                             Postal code
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
+                            <div
+                                className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                             <input
                                 type="text"
                                 name="postal-code"
                                 id="postal-code"
                                 autoComplete="postal-code"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                             />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -134,7 +152,7 @@ export default function Page() {
                                     name="payment-type"
                                     type="radio"
                                     defaultChecked
-                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
                                 <label htmlFor="credit-card" className="ml-3 block text-sm font-medium text-gray-700">
                                     Credit card
@@ -148,14 +166,17 @@ export default function Page() {
                             <label htmlFor="card-number" className="block text-sm font-medium text-gray-700">
                                 Card number
                             </label>
-                            <div className="mt-1">
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
                                     type="text"
                                     id="card-number"
                                     name="card-number"
                                     autoComplete="cc-number"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
+                                </div>
                             </div>
                         </div>
 
@@ -163,14 +184,17 @@ export default function Page() {
                             <label htmlFor="name-on-card" className="block text-sm font-medium text-gray-700">
                                 Name on card
                             </label>
-                            <div className="mt-1">
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
                                     type="text"
                                     id="name-on-card"
                                     name="name-on-card"
                                     autoComplete="cc-name"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
+                                </div>
                             </div>
                         </div>
 
@@ -178,14 +202,17 @@ export default function Page() {
                             <label htmlFor="expiration-date" className="block text-sm font-medium text-gray-700">
                                 Expiration date (MM/YY)
                             </label>
-                            <div className="mt-1">
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
                                     type="text"
                                     name="expiration-date"
                                     id="expiration-date"
                                     autoComplete="cc-exp"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
+                                </div>
                             </div>
                         </div>
 
@@ -193,14 +220,17 @@ export default function Page() {
                             <label htmlFor="cvc" className="block text-sm font-medium text-gray-700">
                                 CVC
                             </label>
-                            <div className="mt-1">
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
                                     type="text"
                                     name="cvc"
                                     id="cvc"
-                                    autoComplete="csc"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    autoComplete="cvc"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -239,15 +269,15 @@ export default function Page() {
                         </ul>
                         <dl className="space-y-6 border-t border-gray-200 px-4 py-6 sm:px-6">
                             <div className="flex items-center justify-between">
-                                <dt className="text-sm">Subtotal</dt>
+                                <dt className="text-sm text-gray-900">Subtotal</dt>
                                 <dd className="text-sm font-medium text-gray-900">${total.toFixed(2)}</dd>
                             </div>
                             <div className="flex items-center justify-between">
-                                <dt className="text-sm">Shipping</dt>
+                                <dt className="text-sm text-gray-900">Shipping</dt>
                                 <dd className="text-sm font-medium text-gray-900">$0.00</dd>
                             </div>
                             <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-                                <dt className="text-base font-medium">Total</dt>
+                                <dt className="text-base font-medium text-gray-900">Total</dt>
                                 <dd className="text-base font-medium text-gray-900">${total.toFixed(2)}</dd>
                             </div>
                         </dl>

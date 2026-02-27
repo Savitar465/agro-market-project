@@ -3,10 +3,17 @@
 import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
 import {useState, use} from 'react'
+import {calculateDistance} from '@/lib/geo'
+import dynamic from 'next/dynamic'
+
+const Map = dynamic(() => import('@/components/map/Map'), { 
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-gray-100 animate-pulse flex items-center justify-center">Loading Map...</div>
+})
 
 export default function Page({params}: { params: Promise<{ id: string }> }) {
     const {id} = use(params)
-    const {products, addToCart} = useStore()
+    const {products, addToCart, userCoords} = useStore()
     const product = products.find(p => p.id === id)
     const router = useRouter()
     const [qty, setQty] = useState(1)
@@ -19,6 +26,10 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
         addToCart(product.id, qty)
         router.push('/cart')
     }
+
+    const distance = userCoords && product.seller?.coords 
+        ? calculateDistance(userCoords, product.seller.coords)
+        : null
 
     return (
         <div className="bg-white">
@@ -117,7 +128,25 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                                 <div className="mt-4">
                                     <p className="text-sm text-gray-600">{product.seller.name}</p>
                                     <p className="text-sm text-gray-600">{product.seller.location}</p>
+                                    {distance !== null && (
+                                        <p className="mt-1 text-sm font-medium text-indigo-600">
+                                            {distance.toFixed(1)} km from your location
+                                        </p>
+                                    )}
                                 </div>
+                            </div>
+                        )}
+
+                        {product.seller?.coords && (
+                            <div className="mt-6 h-64 w-full rounded-lg overflow-hidden border border-gray-200">
+                                <Map 
+                                    center={[product.seller.coords.lat, product.seller.coords.lng]} 
+                                    zoom={12}
+                                    markers={[{
+                                        position: [product.seller.coords.lat, product.seller.coords.lng],
+                                        label: product.seller.name
+                                    }]}
+                                />
                             </div>
                         )}
                     </div>

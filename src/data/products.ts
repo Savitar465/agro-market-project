@@ -1,3 +1,8 @@
+export type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -13,6 +18,7 @@ export type Product = {
     id: string;
     name: string;
     location?: string;
+    coords?: Coordinates;
   };
 };
 
@@ -44,7 +50,7 @@ export const products: Product[] = [
     category: 'Fruits',
     stock: 150,
     rating: 4.8,
-    seller: { id: 'farm-A1', name: 'Orchard Fresh Farms', location: 'Yakima, WA' },
+    seller: { id: 'farm-A1', name: 'Orchard Fresh Farms', location: 'Yakima, WA', coords: { lat: 46.6021, lng: -120.5059 } },
   },
   {
     id: 'carrots-rainbow-002',
@@ -58,7 +64,7 @@ export const products: Product[] = [
     category: 'Vegetables',
     stock: 80,
     rating: 4.6,
-    seller: { id: 'farm-B2', name: 'Sunset Valley Organics', location: 'Ojai, CA' },
+    seller: { id: 'farm-B2', name: 'Sunset Valley Organics', location: 'Ojai, CA', coords: { lat: 34.4481, lng: -119.2429 } },
   },
   {
     id: 'eggs-pasture-003',
@@ -72,7 +78,7 @@ export const products: Product[] = [
     category: 'Dairy & Eggs',
     stock: 50,
     rating: 4.9,
-    seller: { id: 'farm-C3', name: 'Happy Hen Homestead', location: 'Lancaster, PA' },
+    seller: { id: 'farm-C3', name: 'Happy Hen Homestead', location: 'Lancaster, PA', coords: { lat: 40.0379, lng: -76.3055 } },
   },
   {
     id: 'beef-ground-004',
@@ -86,7 +92,7 @@ export const products: Product[] = [
     category: 'Meat & Poultry',
     stock: 30,
     rating: 4.9,
-    seller: { id: 'ranch-D4', name: 'Green Pastures Ranch', location: 'Boulder, CO' },
+    seller: { id: 'ranch-D4', name: 'Green Pastures Ranch', location: 'Boulder, CO', coords: { lat: 40.0150, lng: -105.2705 } },
   },
   {
     id: 'bread-sourdough-005',
@@ -100,7 +106,7 @@ export const products: Product[] = [
     category: 'Bakery',
     stock: 40,
     rating: 4.7,
-    seller: { id: 'bakery-E5', name: 'The Daily Rise Bakery', location: 'San Francisco, CA' },
+    seller: { id: 'bakery-E5', name: 'The Daily Rise Bakery', location: 'San Francisco, CA', coords: { lat: 37.7749, lng: -122.4194 } },
   },
   {
     id: 'honey-raw-006',
@@ -114,7 +120,7 @@ export const products: Product[] = [
     category: 'Pantry',
     stock: 100,
     rating: 4.8,
-    seller: { id: 'apiary-F6', name: 'Golden Bee Apiary', location: 'Asheville, NC' },
+    seller: { id: 'apiary-F6', name: 'Golden Bee Apiary', location: 'Asheville, NC', coords: { lat: 35.5951, lng: -82.5515 } },
   },
   {
     id: 'kombucha-ginger-007',
@@ -128,7 +134,7 @@ export const products: Product[] = [
     category: 'Beverages',
     stock: 60,
     rating: 4.6,
-    seller: { id: 'brewery-G7', name: 'Ferment for Good', location: 'Portland, OR' },
+    seller: { id: 'brewery-G7', name: 'Ferment for Good', location: 'Portland, OR', coords: { lat: 45.5152, lng: -122.6784 } },
   },
   {
     id: 'oranges-allpurpose-008',
@@ -142,6 +148,6 @@ export const products: Product[] = [
     category: 'Fruits',
     stock: 200,
     rating: 4.7,
-    seller: { id: 'maker-H8', name: 'Pure Planet Home', location: 'Austin, TX' },
+    seller: { id: 'maker-H8', name: 'Pure Planet Home', location: 'Austin, TX', coords: { lat: 30.2672, lng: -97.7431 } },
   },
 ];

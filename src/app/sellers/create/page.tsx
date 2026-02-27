@@ -28,13 +28,16 @@ export default function Page() {
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                 Seller name
                             </label>
-                            <div className="mt-1">
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
                                     {...register('name', {required: true})}
                                     type="text"
                                     id="name"
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
                                 />
+                            </div>
                             </div>
                         </div>
                     </div>

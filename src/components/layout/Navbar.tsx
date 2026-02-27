@@ -31,7 +31,7 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
             name: c,
             featured: products.filter((p) => p.category === c).slice(0, 2).map((p) => ({
                 name: p.name,
-                href: `/product/${p.id}`,
+                href: `/products/${p.id}`,
                 imageSrc: p.image,
                 imageAlt: p.description,
             })),
@@ -41,7 +41,7 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                     name: `All ${c}`,
                     items: products.filter((p) => p.category === c).map((p) => ({
                         name: p.name,
-                        href: `/product/${p.id}`,
+                        href: `/products/${p.id}`,
                     })),
                 },
             ],
@@ -294,17 +294,17 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                                         <ul>
                                                             {sellers.map((seller) => (
                                                                 <li key={seller.id}>
-                                                                    <Link href={`/sellers/${seller.id}`}
+                                                                    <a href={`/sellers/${seller.id}`}
                                                                           className="font-medium text-gray-900 hover:text-gray-700">
                                                                         {seller.name}
-                                                                    </Link>
+                                                                    </a>
                                                                 </li>
                                                             ))}
                                                             <li>
-                                                                <Link href="/sellers/create"
+                                                                <a href="/sellers/create"
                                                                       className="font-medium text-indigo-600 hover:text-indigo-500">
                                                                     Create a Seller
-                                                                </Link>
+                                                                </a>
                                                             </li>
                                                         </ul>
                                                     </div>

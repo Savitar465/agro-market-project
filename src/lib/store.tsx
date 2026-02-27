@@ -1,7 +1,7 @@
 'use client'
 
 import React, {createContext, useContext, useMemo, useState} from 'react'
-import {products as seedProducts, type Product} from '@/data/products'
+import {products as seedProducts, type Product, type Coordinates} from '@/data/products'
 import {sellers as seedSellers, type Seller} from '@/data/sellers'
 
 export type CartItem = { id: string; qty: number };
@@ -20,6 +20,8 @@ export type StoreState = {
   setQty: (id: string, qty: number) => void;
   clearCart: () => void;
   checkout: () => void;
+  userCoords: Coordinates | null;
+  setUserCoords: (coords: Coordinates | null) => void;
 };
 
 const StoreContext = createContext<StoreState | undefined>(undefined)
@@ -28,6 +30,7 @@ export function StoreProvider({children}: {children: React.ReactNode}) {
   const [products, setProducts] = useState<Product[]>(seedProducts)
   const [sellers, setSellers] = useState<Seller[]>(seedSellers)
   const [cart, setCart] = useState<CartItem[]>([])
+  const [userCoords, setUserCoords] = useState<Coordinates | null>(null)
 
   const addProduct = (p: Product, sellerId: string) => {
     const newProduct = {...p, id: p.id || `${Date.now()}`};
@@ -86,7 +89,7 @@ export function StoreProvider({children}: {children: React.ReactNode}) {
     clearCart()
   }
 
-  const value = useMemo<StoreState>(() => ({products, addProduct, updateProduct, deleteProduct, updateStock, sellers, addSeller, cart, addToCart, removeFromCart, setQty, clearCart, checkout}), [products, sellers, cart])
+  const value = useMemo<StoreState>(() => ({products, addProduct, updateProduct, deleteProduct, updateStock, sellers, addSeller, cart, addToCart, removeFromCart, setQty, clearCart, checkout, userCoords, setUserCoords}), [products, sellers, cart, userCoords])
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
