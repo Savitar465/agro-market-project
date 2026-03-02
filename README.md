@@ -1,145 +1,190 @@
-# 🌱 Plataforma Web Full-Stack para Comercialización de Productos Agrícolas
+# 🌱 Plataforma Web de Comercialización Agrícola
 
-Aplicación web desarrollada con tecnologías Full-Stack que permite a
-productores de zonas rurales y mercados locales comercializar sus
-productos directamente con consumidores urbanos, reduciendo la
-dependencia de intermediarios y fomentando el comercio justo.
+## Descripción
 
-------------------------------------------------------------------------
-
-## 🎯 Objetivos del Proyecto
-
-### Objetivo General
-
-Desarrollar una plataforma web Full-Stack que facilite la compra y venta
-directa de productos agrícolas entre productores y consumidores.
-
-### Objetivos Específicos
-
--   Implementar autenticación segura de usuarios (productores y
-    consumidores).
--   Permitir la gestión completa de productos agrícolas (CRUD).
--   Visualizar productos en una interfaz dinámica y accesible.
--   Integrar un módulo básico de recomendaciones.
--   Aplicar principios de arquitectura de software y buenas prácticas.
--   Reducir la brecha digital mediante una solución tecnológica
-    accesible.
+Sistema web Full-Stack que permite a productores agrícolas comercializar
+sus productos directamente con consumidores urbanos, reduciendo la
+dependencia de intermediarios y fomentando el comercio justo mediante
+una plataforma digital accesible y segura.
 
 ------------------------------------------------------------------------
 
-## 🏗️ Arquitectura del Sistema
+## Objetivo general
 
-El sistema está diseñado bajo una arquitectura cliente-servidor
-desacoplada, siguiendo principios de separación de responsabilidades y
-modularidad.
-
-### 🔹 Modelo Arquitectónico
-
-Se emplea una arquitectura basada en:
-
--   Frontend desacoplado (SPA)
--   Backend API REST
--   Base de datos relacional
--   Comunicación mediante JSON sobre HTTP/HTTPS
-
-El backend implementa:
-
--   Arquitectura en capas
--   Controladores, servicios y repositorios
--   DTOs para validación
--   Autenticación basada en JWT
--   Manejo estructurado de errores
-
-### 🔹 Flujo General del Sistema
-
-Usuario\
-↓\
-Frontend (React)\
-↓ HTTP/JSON\
-Backend (NestJS)\
-↓\
-Base de Datos (PostgreSQL)
+Desarrollar una plataforma web Full-Stack que permita la gestión y
+comercialización directa de productos agrícolas entre productores y
+consumidores.
 
 ------------------------------------------------------------------------
 
-## 💻 Stack Tecnológico
+## Objetivos específicos (medibles)
 
-### 🔹 Frontend
-
--   React
--   JavaScript / TypeScript
--   Axios (consumo de API)
--   React Router
--   CSS
-
-### 🔹 Backend
-
--   Node.js
--   NestJS
--   JWT (Autenticación)
--   Class-validator
-
-### 🔹 Base de Datos
-
--   PostgreSQL
--   ORM (TypeORM o Prisma)
-
-### 🔹 Herramientas
-
--   Git & GitHub
--   Postman
--   Docker (opcional)
--   VS Code
+-   Implementar una API REST con al menos 5 endpoints core funcionando.
+-   Persistir datos en base de datos PostgreSQL y validar operaciones
+    con Postman.
+-   Desarrollar un sistema de autenticación con JWT.
+-   Implementar CRUD completo de productos agrícolas.
+-   Proteger rutas privadas mediante middleware de autenticación.
 
 ------------------------------------------------------------------------
 
-## 🔐 Funcionalidades Implementadas
+## Alcance (qué incluye / qué NO incluye)
+
+### Incluye:
 
 -   Registro e inicio de sesión de usuarios
 -   Gestión de roles (Productor / Consumidor)
 -   CRUD de productos agrícolas
--   Listado dinámico de productos
--   Protección de rutas autenticadas
--   Validación de formularios
--   Manejo básico de errores
+-   Conexión a base de datos PostgreSQL
+-   Validación de datos en backend
+-   Consumo de API desde frontend
+
+### No incluye (por ahora):
+
+-   Sistema de pagos en línea
+-   Notificaciones en tiempo real
+-   Roles administrativos avanzados
+-   Aplicación móvil nativa
 
 ------------------------------------------------------------------------
 
-## 🚀 Instalación y Ejecución en Local
+## Stack tecnológico
 
-### 1️⃣ Clonar el repositorio
+-   Frontend: React + TypeScript
+-   Backend: Node.js + NestJS
+-   Base de datos: PostgreSQL
+-   Testing: Postman
+-   Control de versiones: Git + GitHub
+-   Opcional: Docker
 
-git clone https://github.com/tu-usuario/tu-repositorio.git\
-cd tu-repositorio
+------------------------------------------------------------------------
 
-### 2️⃣ Configuración del Backend
+## Arquitectura (resumen simple)
 
-cd backend\
+Cliente (React Frontend) → API REST (NestJS Backend) → Base de datos
+(PostgreSQL)
+
+Arquitectura en capas: - Controller → recibe la petición - Service →
+aplica la lógica de negocio - Repository / ORM → gestiona acceso a base
+de datos
+
+------------------------------------------------------------------------
+
+## Endpoints core (priorizados)
+
+1.  POST /auth/register
+2.  POST /auth/login
+3.  POST /products
+4.  GET /products
+5.  PATCH /products/:id
+6.  DELETE /products/:id
+
+------------------------------------------------------------------------
+
+## Cómo ejecutar el proyecto (local)
+
+### 1. Clonar repositorio
+
+``` bash
+git clone <URL>
+cd nombre-del-proyecto
+```
+
+### 2. Instalar dependencias
+
+Backend:
+
+``` bash
+cd backend
 npm install
+```
 
-Crear archivo `.env`:
+Frontend:
 
-DATABASE_HOST=localhost\
-DATABASE_PORT=5432\
-DATABASE_USER=postgres\
-DATABASE_PASSWORD=tu_password\
-DATABASE_NAME=nombre_db\
-JWT_SECRET=tu_clave_secreta
+``` bash
+cd frontend
+npm install
+```
 
-Ejecutar servidor:
+### 3. Configurar variables de entorno
 
+Crear archivo `.env` en la carpeta backend.
+
+### 4. Ejecutar servidor
+
+Backend:
+
+``` bash
 npm run start:dev
+```
 
-### 3️⃣ Configuración del Frontend
+Frontend:
 
-cd frontend\
-npm install\
+``` bash
 npm start
+```
 
 ------------------------------------------------------------------------
 
+## Variables de entorno (ejemplo)
 
-## 👨‍💻 Autor
+``` env
+PORT=3000
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=tu_password
+DATABASE_NAME=agro_db
+JWT_SECRET=clave_secreta
+```
 
-Proyecto desarrollado por Jonas Maidana como parte del módulo de especialidad en
-Desarrollo Full-Stack.
+------------------------------------------------------------------------
+
+## Equipo y roles
+
+-   Jonas Maidana: Backend / Arquitectura
+-   Nombre 2: Frontend
+-   Nombre 3: DevOps / QA
+
+------------------------------------------------------------------------
+
+# 📂 Estructura Básica del Backend
+
+    backend/
+    │
+    ├── src/
+    │   ├── app.js / main.ts
+    │   ├── server.js
+    │   │
+    │   ├── routes/
+    │   │   └── product.routes.js
+    │   │
+    │   ├── controllers/
+    │   │   └── product.controller.js
+    │   │
+    │   ├── services/
+    │   │   └── product.service.js
+    │   │
+    │   ├── models/
+    │   │   └── product.model.js
+    │   │
+    │   ├── db/
+    │   │   └── index.js
+    │   │
+    │   ├── middlewares/
+    │   │   └── auth.js
+    │   │
+    │   └── config/
+    │       └── env.js
+    │
+    ├── tests/
+    ├── .env.example
+    ├── package.json
+    └── README.md
+
+### Explicación simple
+
+-   Routes recibe la petición HTTP.
+-   Controller decide qué acción ejecutar.
+-   Service aplica la lógica del negocio.
+-   Model / DB guarda o consulta los datos.

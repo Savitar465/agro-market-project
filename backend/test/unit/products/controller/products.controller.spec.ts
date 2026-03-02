@@ -1,0 +1,70 @@
+import { Test } from '@nestjs/testing';
+import { ProductsController } from '../../../../src/products/controller/products.controller';
+import { PRODUCTS_SERVICE } from '../../../../src/common/tokens';
+import { IProductsService } from '../../../../src/products/services/products.service.interface';
+
+describe('ProductsController', () => {
+  let controller: ProductsController;
+  let service: jest.Mocked<IProductsService>;
+
+  beforeEach(async () => {
+    service = {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    } as any;
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [ProductsController],
+      providers: [
+        { provide: PRODUCTS_SERVICE, useValue: service },
+      ],
+    }).compile();
+
+    controller = moduleRef.get(ProductsController);
+  });
+
+  it('should delegate create', () => {
+    const dto = { name: 'Apple', price: 3 } as any;
+    const created = { id: 1, ...dto } as any;
+    service.create.mockReturnValue(created);
+
+    const result = controller.create(dto);
+
+    expect(service.create).toHaveBeenCalledWith(dto);
+    expect(result).toEqual(created);
+  });
+
+  it('should delegate findAll', () => {
+    const list = [{ id: 1 }, { id: 2 }] as any;
+    service.findAll.mockReturnValue(list);
+
+    expect(controller.findAll()).toBe(list);
+    expect(service.findAll).toHaveBeenCalled();
+  });
+
+  it('should delegate findOne', () => {
+    const product = { id: 5 } as any;
+    service.findOne.mockReturnValue(product);
+
+    expect(controller.findOne(5)).toBe(product);
+    expect(service.findOne).toHaveBeenCalledWith(5);
+  });
+
+  it('should delegate update', () => {
+    const updated = { id: 2, name: 'X' } as any;
+    service.update.mockReturnValue(updated);
+
+    const dto = { name: 'X' } as any;
+    expect(controller.update(2, dto)).toBe(updated);
+    expect(service.update).toHaveBeenCalledWith(2, dto);
+  });
+
+  it('should call remove and return message', () => {
+    const resp = controller.remove(9);
+    expect(service.remove).toHaveBeenCalledWith(9);
+    expect(resp).toEqual({ message: 'Product 9 removed' });
+  });
+});
