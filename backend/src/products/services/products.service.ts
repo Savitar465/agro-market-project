@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
+import { FilterProductBySellerDto } from '../dto/filter-product-by-seller.dto';
 import { Product } from '../entities/product.entity';
 import { IProductRepository } from '../repositories/products.repository.interface';
 import { PRODUCTS_REPOSITORY } from '../../common/tokens';
@@ -24,6 +25,10 @@ export class ProductsService implements IProductsService {
 
   findWithFilters(filters: FilterProductDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     return this.repo.findWithFilters(filters);
+  }
+
+  findBySeller(filters: FilterProductBySellerDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+    return this.repo.findBySeller(filters);
   }
 
   findOne(id: string): Promise<Product> {

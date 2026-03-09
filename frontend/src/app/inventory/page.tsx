@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 export default function InventoryPage() {
-  const { products, updateStock, deleteProduct } = useStore()
+  const { products, productsLoading, productsError, updateStock, deleteProduct } = useStore()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [tempStock, setTempStock] = useState<number>(0)
 
@@ -14,15 +14,31 @@ export default function InventoryPage() {
     setTempStock(currentStock)
   }
 
-  const handleSaveStock = (id: string) => {
-    updateStock(id, tempStock)
-    setEditingId(null)
+  const handleSaveStock = async (id: string) => {
+    try {
+      await updateStock(id, tempStock)
+      setEditingId(null)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to update stock')
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id)
+      try {
+        await deleteProduct(id)
+      } catch (error) {
+        alert(error instanceof Error ? error.message : 'Unable to delete product')
+      }
     }
+  }
+
+  if (productsLoading) {
+    return <div className="px-4 sm:px-6 lg:px-8 py-8">Loading products...</div>
+  }
+
+  if (productsError) {
+    return <div className="px-4 sm:px-6 lg:px-8 py-8 text-red-600">{productsError}</div>
   }
 
   return (

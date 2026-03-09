@@ -19,9 +19,13 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
         return <div>Seller not found</div>
     }
 
-    const onSubmit = (data: Product) => {
-        addProduct(data, seller.id)
-        router.refresh()
+    const onSubmit = async (data: Product) => {
+        try {
+            await addProduct(data, seller.id)
+            router.refresh()
+        } catch (error) {
+            alert(error instanceof Error ? error.message : 'Unable to add product')
+        }
     }
 
     return (

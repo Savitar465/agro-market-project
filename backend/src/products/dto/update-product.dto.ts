@@ -49,4 +49,9 @@ export class UpdateProductDto {
   @IsNumber()
   @Min(0)
   rating?: number;
+
+  @ApiProperty({ required: false, description: 'Seller ID who owns this product' })
+  @IsOptional()
+  @IsString()
+  sellerId?: string;
 }

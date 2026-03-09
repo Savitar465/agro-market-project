@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Inject, Param, ParseUUIDPipe, Patch, Pos
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
+import { FilterProductBySellerDto } from '../dto/filter-product-by-seller.dto';
 import { IProductsService } from '../services/products.service.interface';
 import { PRODUCTS_SERVICE } from '../../common/tokens';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -45,6 +46,26 @@ export class ProductsController {
   })
   findWithFilters(@Query() filters: FilterProductDto) {
     return this.productsService.findWithFilters(filters);
+  }
+
+  @Get('by-seller/:sellerId')
+  @Public()
+  @ApiOperation({ summary: 'Filter products by seller with pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'Products filtered by seller with pagination data',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array' },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+      }
+    }
+  })
+  findBySeller(@Param('sellerId', ParseUUIDPipe) sellerId: string, @Query() filters: FilterProductBySellerDto) {
+    return this.productsService.findBySeller({ ...filters, sellerId });
   }
 
   @Get()

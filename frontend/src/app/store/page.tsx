@@ -14,7 +14,7 @@ const Map = dynamic(() => import('@/components/map/Map'), {
 })
 
 export default function Page() {
-    const {products, userCoords, setUserCoords} = useStore()
+    const {products, productsLoading, productsError, userCoords, setUserCoords} = useStore()
     const searchParams = useSearchParams()
     const q = searchParams.get('q')
     const category = searchParams.get('category')
@@ -52,6 +52,14 @@ export default function Page() {
         }
         return 0
     })
+
+    if (productsLoading) {
+        return <div>Loading products...</div>
+    }
+
+    if (productsError) {
+        return <div className="text-red-600">{productsError}</div>
+    }
 
     return (
         <div>
@@ -116,7 +124,7 @@ export default function Page() {
                                 <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
                                 <div className="flex justify-between items-center mt-1">
                                     <div>
-                                        <p className="text-lg font-medium text-gray-900">${product.price.toFixed(2)}</p>
+                                        <p className="text-lg font-medium text-gray-900">${product.price}</p>
                                         {distance !== null && (
                                             <p className="text-xs text-gray-500">{distance.toFixed(1)} km away</p>
                                         )}

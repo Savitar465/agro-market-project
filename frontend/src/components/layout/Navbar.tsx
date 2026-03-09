@@ -1,5 +1,6 @@
 'use client'
 import {useStore} from '@/lib/store'
+import {useAuth} from '@/lib/auth/auth-context'
 import {
     Dialog,
     DialogBackdrop,
@@ -23,6 +24,7 @@ import Link from "next/link";
 export default function Navbar({children}: Readonly<{ children: React.ReactNode; }>) {
     const [open, setOpen] = useState(false)
     const router = useRouter()
+    const {isAuthenticated, isAuthLoading, logout} = useAuth()
     const {cart, products, sellers} = useStore()
     const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
     const navigation = {
@@ -46,6 +48,11 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                 },
             ],
         })),
+    }
+
+    const handleLogout = () => {
+        logout()
+        router.push('/login')
     }
 
     return (
@@ -148,6 +155,25 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                         {/*        </a>*/}
                         {/*    </div>*/}
                         {/*</div>*/}
+
+                        <div className="space-y-2 border-t border-gray-200 px-4 py-6">
+                            {isAuthenticated ? (
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700"
+                                >
+                                    Logout
+                                </button>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white"
+                                >
+                                    Login
+                                </Link>
+                            )}
+                        </div>
 
                         <div className="border-t border-gray-200 px-4 py-6">
                             <a href="#" className="-m-2 flex items-center p-2">
@@ -330,15 +356,28 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                     <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
                                     <input name="q" placeholder="Search products" className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
                                     </div>
-                                    <button className="p-2 text-indigo-600 hover:text-indigo-500" aria-label="Search">
+                                    <button type="submit" className="p-2 text-indigo-600 hover:text-indigo-500" aria-label="Search">
                                         <MagnifyingGlassIcon aria-hidden="true" className="size-5"/>
                                     </button>
                                 </form>
 
                                 {/* Cart & Sell */}
                                 <div className="ml-4 flex items-center gap-4 lg:ml-6">
-                                    <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
-                                    <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
+                                    {!isAuthLoading && isAuthenticated ? (
+                                        <>
+                                            <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
+                                            <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
+                                            <button
+                                                type="button"
+                                                onClick={handleLogout}
+                                                className="text-sm font-medium text-gray-700 hover:text-indigo-500"
+                                            >
+                                                Logout
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Login</Link>
+                                    )}
                                     <Link href="/cart" className="group -m-2 flex items-center p-2">
                                         <ShoppingBagIcon
                                             aria-hidden="true"

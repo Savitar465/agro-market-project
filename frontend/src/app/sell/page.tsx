@@ -27,7 +27,7 @@ export default function Page() {
         }
     }, [userCoords, setUserCoords])
 
-    const onSubmit = (data: Product) => {
+    const onSubmit = async (data: Product) => {
         const productWithCoords = {
             ...data,
             seller: {
@@ -37,8 +37,13 @@ export default function Page() {
                 coords: userCoords || undefined
             }
         }
-        addProduct(productWithCoords, 'default')
-        router.push('/inventory')
+
+        try {
+            await addProduct(productWithCoords, 'default')
+            router.push('/inventory')
+        } catch (error) {
+            alert(error instanceof Error ? error.message : 'Unable to create product')
+        }
     }
 
     return (

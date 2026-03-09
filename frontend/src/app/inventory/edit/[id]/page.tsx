@@ -9,10 +9,10 @@ import React from 'react';
 
 export default function EditProductPage({params}: { params: Promise<{ id: string }> }) {
     const {id} = use(params)
-    const {products, updateProduct} = useStore()
+    const {products, productsLoading, updateProduct} = useStore()
     const router = useRouter()
     const product = products.find(p => p.id === id)
-    
+
     const {register, handleSubmit, reset} = useForm<Product>()
 
     useEffect(() => {
@@ -21,13 +21,21 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
         }
     }, [product, reset])
 
+    if (productsLoading) {
+        return <div>Loading product...</div>
+    }
+
     if (!product) {
         return <div>Product not found</div>
     }
 
-    const onSubmit = (data: Product) => {
-        updateProduct({...data, id: id})
-        router.push('/inventory')
+    const onSubmit = async (data: Product) => {
+        try {
+            await updateProduct({...data, id: id})
+            router.push('/inventory')
+        } catch (error) {
+            alert(error instanceof Error ? error.message : 'Unable to update product')
+        }
     }
 
     return (

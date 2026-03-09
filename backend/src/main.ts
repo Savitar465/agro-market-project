@@ -16,6 +16,7 @@ async function bootstrap() {
   // Default allowed origins: common localhost ports + production domain
   const defaultAllowed = [
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://localhost:4200',
     'http://localhost:5173',
     'http://192.168.1.60:5432',
@@ -49,7 +50,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
 }
 
 function escapeRegex(s: string) {

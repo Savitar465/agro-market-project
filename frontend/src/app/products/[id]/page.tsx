@@ -13,10 +13,14 @@ const Map = dynamic(() => import('@/components/map/Map'), {
 
 export default function Page({params}: { params: Promise<{ id: string }> }) {
     const {id} = use(params)
-    const {products, addToCart, userCoords} = useStore()
+    const {products, productsLoading, addToCart, userCoords} = useStore()
     const product = products.find(p => p.id === id)
     const router = useRouter()
     const [qty, setQty] = useState(1)
+
+    if (productsLoading) {
+        return <div>Loading product...</div>
+    }
 
     if (!product) {
         return <div>Product not found</div>

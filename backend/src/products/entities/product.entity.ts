@@ -1,5 +1,5 @@
 import {BaseEntity} from "../../common/base/base.entity";
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
 import { Seller } from '../../sellers/entities/seller.entity';
 
 @Entity()
@@ -22,6 +22,6 @@ export class Product extends BaseEntity {
   stock?: number;
   @Column({ type: 'numeric', nullable: true })
   rating?: number;
-  // @OneToOne(() => Seller, seller => seller.id)
-  // seller?: string;
+  @ManyToOne(() => Seller, seller => seller.id, { nullable: true })
+  seller?: Seller;
 }
