@@ -7,12 +7,14 @@ import {AuthModule} from './auth/auth.module';
 import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
 import {APP_GUARD} from "@nestjs/core";
 import { SellersModule } from './sellers/sellers.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
     UsersModule,
     ProductsModule,
     SellersModule,
+    CartModule,
     AuthModule,
     SellersModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),

@@ -26,7 +26,7 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
     const router = useRouter()
     const {isAuthenticated, isAuthLoading, logout} = useAuth()
     const {cart, products, sellers} = useStore()
-    const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
+    const cartCount = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
     const navigation = {
         categories: categories.map((c) => ({
             id: c,

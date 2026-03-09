@@ -82,7 +82,7 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                     <div className="mt-4 lg:row-span-3 lg:mt-0">
                         <h2 className="sr-only">Product information</h2>
                         <div className="flex items-center justify-between">
-                            <p className="text-3xl tracking-tight text-gray-900">${product.price.toFixed(2)}</p>
+                            <p className="text-3xl tracking-tight text-gray-900">${product.price}</p>
                             {product.stock !== undefined && (
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                     {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
@@ -134,7 +134,7 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                                     <p className="text-sm text-gray-600">{product.seller.location}</p>
                                     {distance !== null && (
                                         <p className="mt-1 text-sm font-medium text-indigo-600">
-                                            {distance.toFixed(1)} km from your location
+                                            {distance} km from your location
                                         </p>
                                     )}
                                 </div>
