@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
+import { FilterProductDto } from '../dto/filter-product.dto';
 import { Product } from '../entities/product.entity';
 import { IProductRepository } from '../repositories/products.repository.interface';
 import { PRODUCTS_REPOSITORY } from '../../common/tokens';
@@ -13,23 +14,27 @@ export class ProductsService implements IProductsService {
     private readonly repo: IProductRepository,
   ) {}
 
-  create(dto: CreateProductDto): Product {
-    return this.repo.create(dto);
+  create(dto: CreateProductDto, userId: string): Promise<Product> {
+    return this.repo.create(dto, userId);
   }
 
-  findAll(): Product[] {
+  findAll(): Promise<Product[]> {
     return this.repo.findAll();
   }
 
-  findOne(id: string): Product {
+  findWithFilters(filters: FilterProductDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+    return this.repo.findWithFilters(filters);
+  }
+
+  findOne(id: string): Promise<Product> {
     return this.repo.findOne(id);
   }
 
-  update(id: string, dto: UpdateProductDto): Product {
-    return this.repo.update(id, dto);
+  update(id: string, dto: UpdateProductDto, userId: string): Promise<Product> {
+    return this.repo.update(id, dto, userId);
   }
 
-  remove(id: string): void {
+  remove(id: string): Promise<void> {
     return this.repo.remove(id);
   }
 }

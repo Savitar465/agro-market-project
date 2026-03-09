@@ -67,6 +67,10 @@ class ConfigService {
     .setTitle('Market API')
     .setDescription('The market API documentation')
     .setVersion('1.0')
+    .addSecurity('bearer',{
+      type: 'http',
+      scheme: 'bearer',
+    })
     .build();
 
 }

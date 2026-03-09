@@ -1,26 +1,27 @@
 import {BaseEntity} from "../../common/base/base.entity";
-import {Entity} from "typeorm";
+import { Column, Entity, OneToOne } from 'typeorm';
+import { Seller } from '../../sellers/entities/seller.entity';
 
-// @Entity()
+@Entity()
 export class Product extends BaseEntity {
+  @Column({ type: 'varchar', length: 200 })
   name: string;
+  @Column({ type: 'numeric' })
   price: number;
+  @Column({ type: 'varchar', length: 200, nullable: true })
   unit?: string;
+  @Column({ type: 'varchar', length: 200 })
   image: string;
+  @Column({ type: 'varchar', length: 200, array: true, nullable: true })
   images?: string[];
+  @Column({ type: 'text' })
   description: string;
+  @Column({ type: 'varchar', length: 200 })
   category: string;
+  @Column({ type: 'numeric', nullable: true })
   stock?: number;
+  @Column({ type: 'numeric', nullable: true })
   rating?: number;
-  seller?: {
-    id: string;
-    name: string;
-    location?: string;
-    coords?: Coordinates;
-  };
+  // @OneToOne(() => Seller, seller => seller.id)
+  // seller?: string;
 }
-
-export type Coordinates = {
-  lat: number;
-  lng: number;
-};

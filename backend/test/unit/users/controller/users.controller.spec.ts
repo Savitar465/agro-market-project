@@ -49,7 +49,7 @@ describe('UsersController', () => {
     const user = { id: 5 } as any;
     service.findOne.mockReturnValue(user);
 
-    expect(controller.findOne(5)).toBe(user);
+    expect(controller.findOne('123')).toBe(user);
     expect(service.findOne).toHaveBeenCalledWith(5);
   });
 
@@ -58,12 +58,12 @@ describe('UsersController', () => {
     service.update.mockReturnValue(updated);
 
     const dto = { name: 'X' } as any;
-    expect(controller.update(2, dto)).toBe(updated);
+    expect(controller.update('123', dto)).toBe(updated);
     expect(service.update).toHaveBeenCalledWith(2, dto);
   });
 
   it('should call remove and return message', () => {
-    const resp = controller.remove(9);
+    const resp = controller.remove('123');
     expect(service.remove).toHaveBeenCalledWith(9);
     expect(resp).toEqual({ message: 'User 9 removed' });
   });

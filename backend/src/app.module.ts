@@ -6,9 +6,16 @@ import {configService} from "./config/config.service";
 import {AuthModule} from './auth/auth.module';
 import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
 import {APP_GUARD} from "@nestjs/core";
+import { SellersModule } from './sellers/sellers.module';
 
 @Module({
-  imports: [UsersModule, ProductsModule, TypeOrmModule.forRoot(configService.getTypeOrmConfig()), AuthModule,
+  imports: [
+    UsersModule,
+    ProductsModule,
+    SellersModule,
+    AuthModule,
+    SellersModule,
+    TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -16,14 +23,14 @@ import {APP_GUARD} from "@nestjs/core";
           limit: 10,
         },
       ],
-    }),],
+    })
+  ],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard
-    }
+      useClass: ThrottlerGuard,
+    },
   ],
 })
-export class AppModule {
-}
+export class AppModule {}
