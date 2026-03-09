@@ -1,87 +1,462 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Agro Market API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+RESTful API para una plataforma de marketplace agrícola construida con NestJS, TypeORM y PostgreSQL. Implementa arquitectura en capas (controllers, services, repositories) siguiendo principios SOLID.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Descripción
 
-## Description
+API backend completa para marketplace agrícola con:
+- **Autenticación y Autorización**: JWT, RBAC (roles: Admin, Seller, User)
+- **Gestión de Usuarios**: CRUD completo con hash de contraseñas (bcrypt)
+- **Gestión de Vendedores**: Información de ubicación con coordenadas
+- **Catálogo de Productos**: CRUD con filtros avanzados, paginación y búsqueda
+- **Carrito de Compras**: Agregar/modificar/eliminar items con validación de stock
+- **Checkout Transaccional**: Descuento de stock con locks pesimistas para evitar race conditions
+- **Rate Limiting**: Protección contra abuso con throttling
+- **Documentación OpenAPI**: Swagger UI en `/api`
 
-Simple market starter with Users and Products CRUD implemented in NestJS using a layered architecture (controllers, services, repositories) and SOLID principles.
+### Principios SOLID aplicados:
+- **Dependency Inversion**: servicios dependen de interfaces de repositorios vía tokens de inyección
+- **Single Responsibility**: controllers manejan HTTP, services manejan lógica de negocio, repositories acceden a datos
+- **Open/Closed**: nuevas implementaciones de repositorios pueden agregarse sin modificar servicios
 
-Key SOLID applications:
-- Dependency Inversion: services depend on repository interfaces via injection tokens, allowing easy swapping of implementations.
-- Single Responsibility: controllers handle HTTP concerns, services handle business rules, repositories handle data access.
-- Open/Closed: new repository implementations can be added without modifying services.
+## 🚀 Configuración del Proyecto
 
-## Project setup
+### Prerrequisitos
 
+- **Node.js** >= 18.x
+- **npm** >= 9.x
+- **PostgreSQL** >= 14.x
+- **Git**
+
+### Instalación
+
+1. **Clonar el repositorio**
 ```bash
-$ npm install
+git clone <repository-url>
+cd backend
 ```
 
-## Compile and run the project
-
+2. **Instalar dependencias**
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+3. **Configurar variables de entorno**
 
+Copia el archivo de ejemplo y ajusta los valores:
 ```bash
-# unit tests (Jest, specs under test/**/*.spec.ts)
-$ npm run test
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env.development
 ```
 
-## Resources
+Variables requeridas:
+```env
+# Base de datos PostgreSQL
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+POSTGRES_DATABASE=agro_market
 
-Check out a few resources that may come in handy when working with NestJS:
+# Puerto del servidor
+PORT=3001
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Modo de ejecución (DEV para desarrollo)
+MODE=DEV
 
-## Support
+# Ejecutar migraciones automáticamente al iniciar
+RUN_MIGRATIONS=true
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+4. **Configurar base de datos**
 
-## Stay in touch
+Asegúrate de que PostgreSQL esté corriendo y crea la base de datos:
+```bash
+psql -U postgres -c "CREATE DATABASE agro_market;"
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+5. **Ejecutar migraciones**
+```bash
+npm run migration:run
+```
 
-## License
+## 🏃 Ejecutar la aplicación
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+# Modo desarrollo (watch mode)
+npm run start:dev
+
+# Modo producción
+npm run build
+npm run start:prod
+
+# Modo debug
+npm run start:debug
+```
+
+La API estará disponible en `http://localhost:3001` (o el puerto configurado).
+
+### Documentación Swagger
+Una vez iniciada la aplicación, visita:
+```
+http://localhost:3001/api
+```
+
+## 🧪 Pruebas
+
+```bash
+# Ejecutar pruebas unitarias
+npm run test
+
+# Modo watch
+npm run test:watch
+
+# Cobertura de código
+npm run test:cov
+
+# Pruebas e2e
+npm run test:e2e
+
+# Debug de pruebas
+npm run test:debug
+```
+
+Las pruebas están organizadas en:
+- `test/unit/`: pruebas unitarias por módulo (controllers, services, repositories)
+- `test/e2e/`: pruebas end-to-end
+
+## 📚 Documentación de API
+
+### Módulos Principales
+
+#### 🔐 Autenticación (`/auth`)
+- `POST /auth/login` - Iniciar sesión (genera JWT)
+- `POST /auth/logout` - Cerrar sesión (revoca token)
+
+**Autenticación**: Usa `Bearer <token>` en el header `Authorization` para endpoints protegidos.
+
+#### 👥 Usuarios (`/users`)
+- `POST /users` - Crear usuario (público)
+- `GET /users` - Listar usuarios (Admin)
+- `GET /users/:id` - Obtener usuario
+- `PATCH /users/:id` - Actualizar usuario
+- `DELETE /users/:id` - Eliminar usuario
+
+**Roles disponibles**: `Admin`, `Seller`, `User`
+
+#### 🏪 Vendedores (`/sellers`)
+- `POST /sellers` - Crear vendedor (Admin, Seller)
+- `GET /sellers` - Listar vendedores (público)
+- `GET /sellers/:id` - Obtener vendedor (público)
+- `PATCH /sellers/:id` - Actualizar vendedor (Admin, Seller)
+- `DELETE /sellers/:id` - Eliminar vendedor (Admin)
+
+#### 📦 Productos (`/products`)
+- `POST /products` - Crear producto (Admin, Seller)
+- `GET /products` - Listar productos (público)
+- `GET /products/search` - Buscar con filtros avanzados (público)
+- `GET /products/by-seller/:sellerId` - Productos por vendedor (público)
+- `GET /products/:id` - Obtener producto (público)
+- `PATCH /products/:id` - Actualizar producto (Admin, Seller)
+- `DELETE /products/:id` - Eliminar producto (Admin)
+
+**Filtros disponibles**: `name`, `category`, `minPrice`, `maxPrice`, `minRating`, `minStock`, `unit`, `sortBy`, `sortOrder`, `page`, `limit`
+
+Ver [PRODUCTS_FILTER_API.md](./PRODUCTS_FILTER_API.md) para documentación detallada de filtros.
+
+#### 🛒 Carrito de Compras (`/cart`)
+- `GET /cart` - Obtener carrito activo del usuario autenticado
+- `POST /cart/items` - Agregar item al carrito
+- `PATCH /cart/items/:itemId` - Actualizar cantidad de item
+- `DELETE /cart/items/:itemId` - Eliminar item del carrito
+- `DELETE /cart/items` - Vaciar carrito
+- `POST /cart/checkout` - Finalizar compra (valida y descuenta stock)
+
+**Validaciones de checkout**:
+- Verifica stock disponible para cada producto
+- Usa locks pesimistas para prevenir race conditions
+- Descuenta stock transaccionalmente
+- Retorna error 409 (Conflict) si stock insuficiente
+
+### Ejemplos de Uso
+
+#### Autenticación
+```bash
+# Login
+curl -X POST http://localhost:3001/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password123"}'
+
+# Respuesta
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Agregar al Carrito
+```bash
+curl -X POST http://localhost:3001/cart/items \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"productId": "uuid-del-producto", "quantity": 2}'
+```
+
+#### Checkout
+```bash
+curl -X POST http://localhost:3001/cart/checkout \
+  -H "Authorization: Bearer <token>"
+```
+
+### Rate Limiting
+- Límite: **10 requests por minuto** por IP
+- Header de respuesta: `X-RateLimit-*`
+
+## 🗄️ Migraciones de Base de Datos
+
+```bash
+# Generar nueva migración automáticamente basándose en cambios de entidades
+npm run migration:generate
+
+# Crear migración vacía manualmente
+npm run migration:create
+
+# Ejecutar migraciones pendientes
+npm run migration:run
+
+# Revertir última migración
+npm run migration:revert
+```
+
+**Nota**: Las migraciones se encuentran en `src/migrations/` y se ejecutan automáticamente en desarrollo si `RUN_MIGRATIONS=true`.
+
+## 🐳 Despliegue con Docker
+
+### Build de la imagen
+
+```bash
+# Build de imagen de producción
+docker build -t agro-market-api .
+
+# Run contenedor
+docker run -p 3001:3001 \
+  -e POSTGRES_HOST=host.docker.internal \
+  -e POSTGRES_PORT=5432 \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=your_password \
+  -e POSTGRES_DATABASE=agro_market \
+  -e PORT=3001 \
+  -e MODE=PROD \
+  agro-market-api
+```
+
+### Docker Compose (recomendado)
+
+Crea un archivo `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: agro_market
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DATABASE: agro_market
+      PORT: 3001
+      MODE: PROD
+      RUN_MIGRATIONS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+```
+
+Iniciar servicios:
+```bash
+docker-compose up -d
+```
+
+## 🚀 Despliegue en Producción
+
+### Configuración de Entorno de Producción
+
+1. **Crea `.env.production`**:
+```env
+POSTGRES_HOST=your-db-host.com
+POSTGRES_PORT=5432
+POSTGRES_USER=agro_market_user
+POSTGRES_PASSWORD=strong_password_here
+POSTGRES_DATABASE=agro_market_prod
+
+PORT=3001
+MODE=PROD
+RUN_MIGRATIONS=false
+
+# CORS (dominios permitidos separados por coma)
+CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+
+# JWT Secret (genera uno seguro)
+JWT_SECRET=your-super-secret-jwt-key-here
+```
+
+2. **SSL/TLS para PostgreSQL**: En producción, habilita SSL en la conexión de base de datos (ver `src/config/config.service.ts`).
+
+3. **Ejecutar migraciones manualmente**:
+```bash
+MODE=production npm run migration:run
+```
+
+4. **Build y start**:
+```bash
+npm run build
+MODE=production npm run start:prod
+```
+
+### Consideraciones de Seguridad
+
+- ✅ Autenticación JWT con expiración corta (15 minutos configurado)
+- ✅ Contraseñas hasheadas con bcrypt (salt rounds: 10)
+- ✅ Rate limiting (10 req/min por defecto)
+- ✅ CORS configurado con whitelist de orígenes
+- ✅ Helmet integrado (comentado actualmente, descomentar en producción)
+- ✅ Validación de DTOs con class-validator
+- ✅ Soft deletes en entidades (no se borran físicamente)
+
+**Recomendaciones adicionales**:
+- Usa HTTPS/TLS en producción
+- Configura firewall para limitar acceso a PostgreSQL
+- Implementa log rotation y monitoreo
+- Usa secrets manager para credenciales sensibles
+- Habilita backups automáticos de base de datos
+
+### CI/CD
+
+El proyecto está preparado para integración continua:
+
+**Variables de entorno requeridas en CI**:
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DATABASE`
+- `PORT`
+- `MODE`
+
+**Pipeline sugerido**:
+1. Install dependencies: `npm ci`
+2. Lint: `npm run lint`
+3. Test: `npm run test`
+4. Build: `npm run build`
+5. Build Docker image
+6. Deploy to container registry
+7. Update production service
+
+## 🏗️ Arquitectura
+
+### Estructura de Carpetas
+
+```
+src/
+├── auth/               # Autenticación, guards, RBAC
+├── cart/               # Carrito de compras y checkout
+├── common/             # Utilidades compartidas, base entities
+├── config/             # Configuración de BD y app
+├── migrations/         # Migraciones de TypeORM
+├── products/           # Gestión de productos
+├── sellers/            # Gestión de vendedores
+├── users/              # Gestión de usuarios
+├── app.module.ts       # Módulo raíz
+└── main.ts             # Entry point
+
+test/
+├── unit/               # Pruebas unitarias por módulo
+└── e2e/                # Pruebas end-to-end
+```
+
+### Stack Tecnológico
+
+- **Framework**: NestJS 11.x
+- **Runtime**: Node.js 18+
+- **ORM**: TypeORM 0.3.x
+- **Base de Datos**: PostgreSQL 14+
+- **Autenticación**: JWT (@nestjs/jwt)
+- **Validación**: class-validator, class-transformer
+- **Documentación**: Swagger/OpenAPI (@nestjs/swagger)
+- **Testing**: Jest
+- **Seguridad**: bcrypt, helmet, throttler
+
+## 🔧 Troubleshooting
+
+### Error: "relation does not exist"
+**Solución**: Ejecuta las migraciones:
+```bash
+npm run migration:run
+```
+
+### Error: "JWT expired"
+**Solución**: El token tiene expiración de 15 minutos. Obtén un nuevo token con `/auth/login`.
+
+### Error: "Insufficient stock for product"
+**Solución**: Otro usuario compró el producto antes. Verifica stock actualizado en `/products/:id`.
+
+### Error: "FOR UPDATE cannot be applied..."
+**Solución**: Ya corregido en la versión actual. Asegúrate de usar la última versión del repositorio.
+
+### Puerto 3001 en uso
+**Solución**: Cambia el `PORT` en tu archivo `.env` o detén el proceso que usa el puerto:
+```bash
+# Windows
+netstat -ano | findstr :3001
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:3001 | xargs kill -9
+```
+
+## 📝 Changelog
+
+### v0.0.1 (Actual)
+- ✅ Módulo de autenticación con JWT y RBAC
+- ✅ CRUD de usuarios, productos y vendedores
+- ✅ Filtrado avanzado de productos con paginación
+- ✅ Carrito de compras con checkout transaccional
+- ✅ Validación de stock con locks pesimistas
+- ✅ Documentación Swagger
+- ✅ Rate limiting
+- ✅ Soft deletes en todas las entidades
+
+## 📄 Licencia
+
+Este proyecto es privado y no tiene licencia de código abierto.
+
+## 👥 Equipo
+
+Para dudas o soporte, contacta al equipo de desarrollo.
+
+---
+
+**Documentación adicional**:
+- [Filtros de Productos](./PRODUCTS_FILTER_API.md)
+- [NestJS Documentation](https://docs.nestjs.com)
