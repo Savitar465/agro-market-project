@@ -30,7 +30,9 @@ export class ProductsRepository implements IProductRepository {
     });
   }
 
-  async findWithFilters(filters: FilterProductDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+  async findWithFilters(
+    filters: FilterProductDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     const {
       name,
       category,
@@ -52,16 +54,22 @@ export class ProductsRepository implements IProductRepository {
 
     // Base filters - only active and non-archived products
     queryBuilder.where('product.isActive = :isActive', { isActive: true });
-    queryBuilder.andWhere('product.isArchived = :isArchived', { isArchived: false });
+    queryBuilder.andWhere('product.isArchived = :isArchived', {
+      isArchived: false,
+    });
 
     // Name filter (partial match, case insensitive)
     if (name) {
-      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', { name: `%${name}%` });
+      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
+        name: `%${name}%`,
+      });
     }
 
     // Category filter (exact match, case insensitive)
     if (category) {
-      queryBuilder.andWhere('LOWER(product.category) = LOWER(:category)', { category });
+      queryBuilder.andWhere('LOWER(product.category) = LOWER(:category)', {
+        category,
+      });
     }
 
     // Price range filters
@@ -88,8 +96,17 @@ export class ProductsRepository implements IProductRepository {
     }
 
     // Sorting
-    const validSortFields = ['name', 'price', 'rating', 'createDateTime', 'category', 'stock'];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createDateTime';
+    const validSortFields = [
+      'name',
+      'price',
+      'rating',
+      'createDateTime',
+      'category',
+      'stock',
+    ];
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : 'createDateTime';
     queryBuilder.orderBy(`product.${sortField}`, sortOrder);
 
     // Count total before pagination
@@ -119,7 +136,11 @@ export class ProductsRepository implements IProductRepository {
     return product;
   }
 
-  async update(id: string, dto: UpdateProductDto, userId: string): Promise<Product> {
+  async update(
+    id: string,
+    dto: UpdateProductDto,
+    userId: string,
+  ): Promise<Product> {
     const product = await this.findOne(id);
     Object.assign(product, dto);
     product.lastChangedBy = userId;
@@ -133,7 +154,9 @@ export class ProductsRepository implements IProductRepository {
     await this.repo.save(product);
   }
 
-  async findBySeller(filters: FilterProductBySellerDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+  async findBySeller(
+    filters: FilterProductBySellerDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     const {
       sellerId,
       name,
@@ -153,7 +176,9 @@ export class ProductsRepository implements IProductRepository {
 
     // Base filters - only active and non-archived products
     queryBuilder.where('product.isActive = :isActive', { isActive: true });
-    queryBuilder.andWhere('product.isArchived = :isArchived', { isArchived: false });
+    queryBuilder.andWhere('product.isArchived = :isArchived', {
+      isArchived: false,
+    });
 
     // Seller filter
     if (sellerId) {
@@ -162,12 +187,16 @@ export class ProductsRepository implements IProductRepository {
 
     // Name filter (partial match, case insensitive)
     if (name) {
-      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', { name: `%${name}%` });
+      queryBuilder.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
+        name: `%${name}%`,
+      });
     }
 
     // Category filter (exact match, case insensitive)
     if (category) {
-      queryBuilder.andWhere('LOWER(product.category) = LOWER(:category)', { category });
+      queryBuilder.andWhere('LOWER(product.category) = LOWER(:category)', {
+        category,
+      });
     }
 
     // Price range filters
@@ -179,8 +208,17 @@ export class ProductsRepository implements IProductRepository {
     }
 
     // Sorting
-    const validSortFields = ['name', 'price', 'rating', 'createDateTime', 'category', 'stock'];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createDateTime';
+    const validSortFields = [
+      'name',
+      'price',
+      'rating',
+      'createDateTime',
+      'category',
+      'stock',
+    ];
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : 'createDateTime';
     queryBuilder.orderBy(`product.${sortField}`, sortOrder);
 
     // Count total before pagination

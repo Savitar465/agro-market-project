@@ -1,4 +1,7 @@
-import { encryptAES256CTR, decryptAES256CTR } from '../../../src/common/crypto/aes';
+import {
+  encryptAES256CTR,
+  decryptAES256CTR,
+} from '../../../src/common/crypto/aes';
 
 describe('AES-256-CTR', () => {
   const key = 'my-secret-passphrase';
@@ -20,4 +23,3 @@ describe('AES-256-CTR', () => {
     expect(decryptAES256CTR(e2, key)).toBe(plaintext);
   });
 });
-

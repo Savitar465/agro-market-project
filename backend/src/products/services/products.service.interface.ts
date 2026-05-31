@@ -7,8 +7,12 @@ import { Product } from '../entities/product.entity';
 export interface IProductsService {
   create(dto: CreateProductDto, userId: string): Promise<Product>;
   findAll(): Promise<Product[]>;
-  findWithFilters(filters: FilterProductDto): Promise<{ data: Product[]; total: number; page: number; limit: number }>;
-  findBySeller(filters: FilterProductBySellerDto): Promise<{ data: Product[]; total: number; page: number; limit: number }>;
+  findWithFilters(
+    filters: FilterProductDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }>;
+  findBySeller(
+    filters: FilterProductBySellerDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }>;
   findOne(id: string): Promise<Product>;
   update(id: string, dto: UpdateProductDto, userId: string): Promise<Product>;
   remove(id: string): Promise<void>;

@@ -16,14 +16,19 @@ export class UsersService implements IUsersService {
     private readonly repo: IUserRepository,
   ) {}
 
-  async findOneByUsername(username: string): Promise<User|null> {
+  async findOneByUsername(username: string): Promise<User | null> {
     this.logger.debug(`findOneByUsername called for username=${username}`);
     try {
       const user = await this.repo.findOneByUsername(username);
-      this.logger.debug(`findOneByUsername result for username=${username} -> ${user ? 'found' : 'not found'}`);
+      this.logger.debug(
+        `findOneByUsername result for username=${username} -> ${user ? 'found' : 'not found'}`,
+      );
       return user;
     } catch (err) {
-      this.logger.error(`Error in findOneByUsername for username=${username}`, err as any);
+      this.logger.error(
+        `Error in findOneByUsername for username=${username}`,
+        err as any,
+      );
       throw err;
     }
   }
@@ -33,16 +38,23 @@ export class UsersService implements IUsersService {
     try {
       const user = await this.findOneByUsername(dto.username);
       if (user) {
-        this.logger.warn(`create aborted: user already exists username=${dto.username}`);
+        this.logger.warn(
+          `create aborted: user already exists username=${dto.username}`,
+        );
         throw new Error('User already exists');
       }
       // don't log plaintext password
       dto.password = await bcrypt.hash(dto.password, await bcrypt.genSalt());
       const created = await this.repo.create(dto);
-      this.logger.log(`user created id=${created.id} username=${created.username}`);
+      this.logger.log(
+        `user created id=${created.id} username=${created.username}`,
+      );
       return created;
     } catch (err) {
-      this.logger.error(`Error creating user username=${dto.username}`, err as any);
+      this.logger.error(
+        `Error creating user username=${dto.username}`,
+        err as any,
+      );
       throw err;
     }
   }
@@ -63,7 +75,9 @@ export class UsersService implements IUsersService {
     this.logger.debug(`findOne called id=${id}`);
     try {
       const u = await this.repo.findOne(id);
-      this.logger.debug(`findOne result id=${id} -> ${u ? 'found' : 'not found'}`);
+      this.logger.debug(
+        `findOne result id=${id} -> ${u ? 'found' : 'not found'}`,
+      );
       return u;
     } catch (err) {
       this.logger.error(`Error in findOne id=${id}`, err as any);

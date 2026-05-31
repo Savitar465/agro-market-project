@@ -1,5 +1,6 @@
-import {TypeOrmModuleOptions} from '@nestjs/typeorm';
-import {DocumentBuilder} from "@nestjs/swagger";
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { DocumentBuilder } from '@nestjs/swagger';
+import { JwtSignOptions } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -7,7 +8,9 @@ import * as path from 'path';
 // 1. process.env.MODE
 // 2. process.env.NODE_ENV
 // Fallback to 'development'
-const envName = (process.env.MODE || process.env.NODE_ENV || 'development').toString().toLowerCase();
+const envName = (process.env.MODE || process.env.NODE_ENV || 'development')
+  .toString()
+  .toLowerCase();
 const envFile = path.resolve(process.cwd(), `.env.${envName}`);
 // Try to load the specific env file, then fallback to .env
 dotenv.config({ path: envFile });
@@ -17,9 +20,7 @@ if (!process.env.POSTGRES_HOST) {
 }
 
 class ConfigService {
-
-  constructor(private readonly env: { [k: string]: string | undefined }) {
-  }
+  constructor(private readonly env: { [k: string]: string | undefined }) {}
 
   private getValue(key: string, throwOnMissing = true): string {
     const value = this.env[key];
@@ -42,8 +43,24 @@ class ConfigService {
     return mode != 'DEV';
   }
 
+  public getJwtSecret(): string {
+    // Falls back to a dev-only secret when JWT_SECRET is unset. Production
+    // must set JWT_SECRET (see ensureValues guard below).
+    return this.getValue('JWT_SECRET', false) || 'ZYlXH907GhWEe8';
+  }
+
+  public getJwtExpiresIn(): JwtSignOptions['expiresIn'] {
+    return (this.getValue('JWT_EXPIRES_IN', false) ||
+      '900s') as JwtSignOptions['expiresIn'];
+  }
+
   public getTypeOrmConfig(): TypeOrmModuleOptions {
-    const isTsNode = (process.env.TS_NODE || '').toLowerCase() === 'true';
+    // Detect whether we're running through ts-node (e.g. the TypeORM CLI via
+    // typeorm-ts-node-commonjs) so migrations resolve to the .ts sources.
+    // When compiled and run from dist, __filename ends in .js.
+    const isTsNode =
+      __filename.endsWith('.ts') ||
+      (process.env.TS_NODE || '').toLowerCase() === 'true';
     return {
       type: 'postgres',
 
@@ -67,21 +84,24 @@ class ConfigService {
     .setTitle('Market API')
     .setDescription('The market API documentation')
     .setVersion('1.0')
-    .addSecurity('bearer',{
+    .addSecurity('bearer', {
       type: 'http',
       scheme: 'bearer',
     })
     .build();
-
 }
 
-const configService = new ConfigService(process.env)
-  .ensureValues([
-    'POSTGRES_HOST',
-    'POSTGRES_PORT',
-    'POSTGRES_USER',
-    'POSTGRES_PASSWORD',
-    'POSTGRES_DATABASE'
-  ]);
+const configService = new ConfigService(process.env).ensureValues([
+  'POSTGRES_HOST',
+  'POSTGRES_PORT',
+  'POSTGRES_USER',
+  'POSTGRES_PASSWORD',
+  'POSTGRES_DATABASE',
+]);
 
-export {configService};
+// Never run production on the hardcoded dev JWT secret.
+if (configService.isProduction()) {
+  configService.ensureValues(['JWT_SECRET']);
+}
+
+export { configService };

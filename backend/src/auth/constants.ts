@@ -1,3 +1,5 @@
+import { configService } from '../config/config.service';
+
 export const jwtConstants = {
-  secret: 'ZYlXH907GhWEe8',
+  secret: configService.getJwtSecret(),
 };

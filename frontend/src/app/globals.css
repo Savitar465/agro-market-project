@@ -24,3 +24,19 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+ * Form controls keep a light background across the app, so force a dark,
+ * readable text color instead of inheriting the (possibly light) body
+ * foreground. Applies project-wide, including future inputs.
+ */
+input,
+textarea,
+select {
+  color: #171717;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
+}

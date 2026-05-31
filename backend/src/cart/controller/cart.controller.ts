@@ -1,5 +1,21 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Request } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CART_SERVICE } from '../../common/tokens';
 import { ICartService } from '../services/cart.service.interface';
 import { AddCartItemDto } from '../dto/add-cart-item.dto';
@@ -42,7 +58,10 @@ export class CartController {
   @Delete('items/:itemId')
   @ApiOperation({ summary: 'Remove one item from active cart' })
   @ApiResponse({ status: 200, description: 'Cart item removed' })
-  removeItem(@Param('itemId', ParseUUIDPipe) itemId: string, @Request() req: any) {
+  removeItem(
+    @Param('itemId', ParseUUIDPipe) itemId: string,
+    @Request() req: any,
+  ) {
     return this.cartService.removeItem(req.user.sub, itemId);
   }
 
@@ -60,4 +79,3 @@ export class CartController {
     return this.cartService.checkout(req.user.sub);
   }
 }
-

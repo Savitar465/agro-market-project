@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Cart } from '../entities/cart.entity';
@@ -55,12 +60,15 @@ export class CartRepository implements ICartRepository {
       const targetQuantity = currentQuantity + dto.quantity;
 
       if (availableStock < targetQuantity) {
-        throw new ConflictException(`Insufficient stock for product ${dto.productId}`);
+        throw new ConflictException(
+          `Insufficient stock for product ${dto.productId}`,
+        );
       }
 
       if (existingItem) {
         existingItem.quantity = targetQuantity;
-        existingItem.totalPrice = Number(existingItem.unitPrice) * targetQuantity;
+        existingItem.totalPrice =
+          Number(existingItem.unitPrice) * targetQuantity;
         existingItem.lastChangedBy = userId;
         await itemRepo.save(existingItem);
       } else {
@@ -82,7 +90,11 @@ export class CartRepository implements ICartRepository {
     });
   }
 
-  async updateItem(userId: string, itemId: string, dto: UpdateCartItemDto): Promise<Cart> {
+  async updateItem(
+    userId: string,
+    itemId: string,
+    dto: UpdateCartItemDto,
+  ): Promise<Cart> {
     return this.dataSource.transaction(async (manager) => {
       const itemRepo = manager.getRepository(CartItem);
       const productRepo = manager.getRepository(Product);
@@ -115,7 +127,9 @@ export class CartRepository implements ICartRepository {
 
       const availableStock = Number(product.stock ?? 0);
       if (availableStock < dto.quantity) {
-        throw new ConflictException(`Insufficient stock for product ${item.product.id}`);
+        throw new ConflictException(
+          `Insufficient stock for product ${item.product.id}`,
+        );
       }
 
       item.quantity = dto.quantity;
@@ -184,7 +198,8 @@ export class CartRepository implements ICartRepository {
 
   async checkout(userId: string): Promise<Cart> {
     return this.dataSource.transaction(async (manager) => {
-      const cart = await manager.getRepository(Cart)
+      const cart = await manager
+        .getRepository(Cart)
         .createQueryBuilder('cart')
         .where('cart.status = :status', { status: CartStatus.OPEN })
         .andWhere('cart.isActive = true')
@@ -197,7 +212,8 @@ export class CartRepository implements ICartRepository {
         throw new NotFoundException('Open cart not found');
       }
 
-      const items = await manager.getRepository(CartItem)
+      const items = await manager
+        .getRepository(CartItem)
         .createQueryBuilder('item')
         .innerJoinAndSelect('item.product', 'product')
         .where('item.cartId = :cartId', { cartId: cart.id })
@@ -212,7 +228,8 @@ export class CartRepository implements ICartRepository {
 
       const productRepo = manager.getRepository(Product);
       for (const item of items) {
-        const product = await productRepo.createQueryBuilder('product')
+        const product = await productRepo
+          .createQueryBuilder('product')
           .where('product.id = :id', { id: item.product.id })
           .andWhere('product.isActive = true')
           .andWhere('product.isArchived = false')
@@ -226,7 +243,9 @@ export class CartRepository implements ICartRepository {
         const availableStock = Number(product.stock ?? 0);
         const requestedQuantity = Number(item.quantity);
         if (availableStock < requestedQuantity) {
-          throw new ConflictException(`Insufficient stock for product ${product.id}`);
+          throw new ConflictException(
+            `Insufficient stock for product ${product.id}`,
+          );
         }
 
         product.stock = availableStock - requestedQuantity;
@@ -244,7 +263,10 @@ export class CartRepository implements ICartRepository {
     });
   }
 
-  private async getOrCreateOpenCart(userId: string, manager?: EntityManager): Promise<Cart> {
+  private async getOrCreateOpenCart(
+    userId: string,
+    manager?: EntityManager,
+  ): Promise<Cart> {
     const cartRepo = manager?.getRepository(Cart) ?? this.cartRepo;
     const existing = await cartRepo.findOne({
       where: {
@@ -271,7 +293,11 @@ export class CartRepository implements ICartRepository {
     return cartRepo.save(cart);
   }
 
-  private async recalculateCartTotals(cartId: string, userId: string, manager?: EntityManager): Promise<void> {
+  private async recalculateCartTotals(
+    cartId: string,
+    userId: string,
+    manager?: EntityManager,
+  ): Promise<void> {
     const itemRepo = manager?.getRepository(CartItem) ?? this.itemRepo;
     const cartRepo = manager?.getRepository(Cart) ?? this.cartRepo;
 
@@ -283,11 +309,17 @@ export class CartRepository implements ICartRepository {
       },
     });
 
-    const total = activeItems.reduce((acc, item) => acc + Number(item.totalPrice), 0);
+    const total = activeItems.reduce(
+      (acc, item) => acc + Number(item.totalPrice),
+      0,
+    );
     await cartRepo.update({ id: cartId }, { total, lastChangedBy: userId });
   }
 
-  private async loadCart(cartId: string, manager?: EntityManager): Promise<Cart> {
+  private async loadCart(
+    cartId: string,
+    manager?: EntityManager,
+  ): Promise<Cart> {
     const cartRepo = manager?.getRepository(Cart) ?? this.cartRepo;
     const cart = await cartRepo.findOne({
       where: { id: cartId },
@@ -298,8 +330,9 @@ export class CartRepository implements ICartRepository {
       throw new NotFoundException(`Cart ${cartId} not found`);
     }
 
-    cart.items = (cart.items ?? []).filter((item) => item.isActive && !item.isArchived);
+    cart.items = (cart.items ?? []).filter(
+      (item) => item.isActive && !item.isArchived,
+    );
     return cart;
   }
 }
-

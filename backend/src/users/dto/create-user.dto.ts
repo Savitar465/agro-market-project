@@ -1,11 +1,19 @@
-import {IsAlpha, IsAlphanumeric, IsEmail, IsNotEmpty, IsStrongPassword} from 'class-validator';
-import {ApiProperty} from "@nestjs/swagger";
-import {Role} from "../../auth/rbac/role.enum";
+import {
+  IsAlphanumeric,
+  IsEmail,
+  IsNotEmpty,
+  IsStrongPassword,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../auth/rbac/role.enum';
 
 export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
-  @IsAlpha()
+  @IsString()
+  @MaxLength(200)
   name: string;
   @ApiProperty()
   @IsNotEmpty()
@@ -16,7 +24,7 @@ export class CreateUserDto {
   email: string;
   @ApiProperty()
   @IsNotEmpty()
-  @IsStrongPassword( {
+  @IsStrongPassword({
     minLength: 8,
     minLowercase: 1,
     minNumbers: 1,

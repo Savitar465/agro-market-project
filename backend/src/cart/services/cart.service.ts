@@ -21,7 +21,11 @@ export class CartService implements ICartService {
     return this.repo.addItem(userId, dto);
   }
 
-  updateItem(userId: string, itemId: string, dto: UpdateCartItemDto): Promise<Cart> {
+  updateItem(
+    userId: string,
+    itemId: string,
+    dto: UpdateCartItemDto,
+  ): Promise<Cart> {
     return this.repo.updateItem(userId, itemId, dto);
   }
 
@@ -37,4 +41,3 @@ export class CartService implements ICartService {
     return this.repo.checkout(userId);
   }
 }
-

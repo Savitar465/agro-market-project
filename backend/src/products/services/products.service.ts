@@ -23,11 +23,15 @@ export class ProductsService implements IProductsService {
     return this.repo.findAll();
   }
 
-  findWithFilters(filters: FilterProductDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+  findWithFilters(
+    filters: FilterProductDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     return this.repo.findWithFilters(filters);
   }
 
-  findBySeller(filters: FilterProductBySellerDto): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
+  findBySeller(
+    filters: FilterProductBySellerDto,
+  ): Promise<{ data: Product[]; total: number; page: number; limit: number }> {
     return this.repo.findBySeller(filters);
   }
 

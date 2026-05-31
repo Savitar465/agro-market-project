@@ -62,7 +62,9 @@ describe('ProductsService', () => {
   });
 
   it('should remove product and propagate errors', () => {
-    repo.remove.mockImplementation(() => { throw new NotFoundException(); });
+    repo.remove.mockImplementation(() => {
+      throw new NotFoundException();
+    });
     expect(() => service.remove(99)).toThrow(NotFoundException);
   });
 });

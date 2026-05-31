@@ -18,4 +18,3 @@ import { Product } from '../products/entities/product.entity';
   exports: [CART_SERVICE],
 })
 export class CartModule {}
-

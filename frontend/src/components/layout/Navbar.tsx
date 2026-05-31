@@ -24,7 +24,8 @@ import Link from "next/link";
 export default function Navbar({children}: Readonly<{ children: React.ReactNode; }>) {
     const [open, setOpen] = useState(false)
     const router = useRouter()
-    const {isAuthenticated, isAuthLoading, logout} = useAuth()
+    const {isAuthenticated, isAuthLoading, logout, isSeller, isAdmin} = useAuth()
+    const canSell = isSeller || isAdmin
     const {cart, products, sellers} = useStore()
     const cartCount = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
     const navigation = {
@@ -50,8 +51,8 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
         })),
     }
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        await logout()
         router.push('/login')
     }
 
@@ -166,12 +167,20 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                     Logout
                                 </button>
                             ) : (
-                                <Link
-                                    href="/login"
-                                    className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white"
-                                >
-                                    Login
-                                </Link>
+                                <>
+                                    <Link
+                                        href="/login"
+                                        className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                    >
+                                        Register
+                                    </Link>
+                                </>
                             )}
                         </div>
 
@@ -365,8 +374,12 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                 <div className="ml-4 flex items-center gap-4 lg:ml-6">
                                     {!isAuthLoading && isAuthenticated ? (
                                         <>
-                                            <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
-                                            <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
+                                            {canSell && (
+                                                <>
+                                                    <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
+                                                    <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
+                                                </>
+                                            )}
                                             <button
                                                 type="button"
                                                 onClick={handleLogout}
@@ -376,7 +389,10 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                             </button>
                                         </>
                                     ) : (
-                                        <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Login</Link>
+                                        <>
+                                            <Link href="/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Login</Link>
+                                            <Link href="/register" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Register</Link>
+                                        </>
                                     )}
                                     <Link href="/cart" className="group -m-2 flex items-center p-2">
                                         <ShoppingBagIcon

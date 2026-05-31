@@ -1,9 +1,25 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { CreateSellerDto } from '../dto/create-seller.dto';
 import { UpdateSellerDto } from '../dto/update-seller.dto';
 import { ISellerService } from '../services/sellers.service.interface';
 import { SELLERS_SERVICE } from '../../common/tokens';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from '../../auth/rbac/roles.decorator';
 import { Role } from '../../auth/rbac/role.enum';
 import { Public } from '../../auth/guards/public-auth.decorator';
@@ -57,7 +73,11 @@ export class SellersController {
   @ApiOperation({ summary: 'Update a seller profile' })
   @ApiResponse({ status: 200, description: 'Seller updated successfully' })
   @ApiResponse({ status: 404, description: 'Seller not found' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateSellerDto, @Request() req: any) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateSellerDto,
+    @Request() req: any,
+  ) {
     const userId = req.user?.sub || 'system';
     return this.sellersService.update(id, dto, userId);
   }
@@ -72,4 +92,3 @@ export class SellersController {
     return { message: `Seller ${id} removed successfully` };
   }
 }
-

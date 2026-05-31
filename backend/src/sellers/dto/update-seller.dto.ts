@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, ValidateNested } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class CoordsDto {
@@ -27,12 +32,11 @@ export class UpdateSellerDto {
     type: 'object',
     properties: {
       lat: { type: 'number' },
-      lng: { type: 'number' }
-    }
+      lng: { type: 'number' },
+    },
   })
   @IsOptional()
   @ValidateNested()
   @Type(() => CoordsDto)
   coords?: CoordsDto;
 }
-

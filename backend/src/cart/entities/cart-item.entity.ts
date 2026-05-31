@@ -22,4 +22,3 @@ export class CartItem extends BaseEntity {
   @Column({ type: 'numeric' })
   totalPrice: number;
 }
-

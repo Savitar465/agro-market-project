@@ -37,7 +37,11 @@ export class SellersRepository implements ISellerRepository {
     return seller;
   }
 
-  async update(id: string, dto: UpdateSellerDto, userId: string): Promise<Seller> {
+  async update(
+    id: string,
+    dto: UpdateSellerDto,
+    userId: string,
+  ): Promise<Seller> {
     const seller = await this.findOne(id);
     Object.assign(seller, dto);
     seller.lastChangedBy = userId;
@@ -58,4 +62,3 @@ export class SellersRepository implements ISellerRepository {
     });
   }
 }
-

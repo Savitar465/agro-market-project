@@ -5,9 +5,12 @@ import { Cart } from '../entities/cart.entity';
 export interface ICartRepository {
   getOpenCart(userId: string): Promise<Cart>;
   addItem(userId: string, dto: AddCartItemDto): Promise<Cart>;
-  updateItem(userId: string, itemId: string, dto: UpdateCartItemDto): Promise<Cart>;
+  updateItem(
+    userId: string,
+    itemId: string,
+    dto: UpdateCartItemDto,
+  ): Promise<Cart>;
   removeItem(userId: string, itemId: string): Promise<Cart>;
   clear(userId: string): Promise<Cart>;
   checkout(userId: string): Promise<Cart>;
 }
-

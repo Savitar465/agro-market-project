@@ -3,7 +3,10 @@ import { IsOptional, IsString, IsNumber, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FilterProductDto {
-  @ApiProperty({ required: false, description: 'Search by product name (partial match)' })
+  @ApiProperty({
+    required: false,
+    description: 'Search by product name (partial match)',
+  })
   @IsOptional()
   @IsString()
   name?: string;
@@ -47,12 +50,20 @@ export class FilterProductDto {
   @IsString()
   unit?: string;
 
-  @ApiProperty({ required: false, description: 'Sort by field (name, price, rating, createDateTime)', default: 'createDateTime' })
+  @ApiProperty({
+    required: false,
+    description: 'Sort by field (name, price, rating, createDateTime)',
+    default: 'createDateTime',
+  })
   @IsOptional()
   @IsString()
   sortBy?: string;
 
-  @ApiProperty({ required: false, description: 'Sort order (ASC or DESC)', default: 'DESC' })
+  @ApiProperty({
+    required: false,
+    description: 'Sort order (ASC or DESC)',
+    default: 'DESC',
+  })
   @IsOptional()
   @IsString()
   sortOrder?: 'ASC' | 'DESC';
@@ -72,4 +83,3 @@ export class FilterProductDto {
   @Max(100)
   limit?: number;
 }
-

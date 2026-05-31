@@ -12,7 +12,7 @@ describe('UsersService', () => {
     findAll: jest.Mock<any, any, any>;
     findOne: jest.Mock<any, any, any>;
     update: jest.Mock<any, any, any>;
-    remove: jest.Mock<any, any, any>
+    remove: jest.Mock<any, any, any>;
   };
 
   beforeEach(async () => {
@@ -25,10 +25,7 @@ describe('UsersService', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        { provide: USERS_REPOSITORY, useValue: repo },
-      ],
+      providers: [UsersService, { provide: USERS_REPOSITORY, useValue: repo }],
     }).compile();
 
     service = moduleRef.get(UsersService);

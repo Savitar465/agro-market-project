@@ -10,4 +10,3 @@ export interface ISellerService {
   remove(id: string): Promise<void>;
   findByUserId(userId: string): Promise<Seller | null>;
 }
-

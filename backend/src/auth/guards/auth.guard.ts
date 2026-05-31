@@ -1,14 +1,23 @@
-import {CanActivate, ExecutionContext, Injectable, UnauthorizedException} from "@nestjs/common";
-import {JwtService} from "@nestjs/jwt";
-import {jwtConstants} from "../constants";
-import {Reflector} from "@nestjs/core";
-import {IS_PUBLIC_KEY} from "./public-auth.decorator";
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from '../constants';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from './public-auth.decorator';
 import { Request } from 'express';
-import {TokenRevocationService} from '../services/token-revocation.service';
+import { TokenRevocationService } from '../services/token-revocation.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector, private revocation: TokenRevocationService) {}
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+    private revocation: TokenRevocationService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

@@ -22,4 +22,3 @@ export class Cart extends BaseEntity {
   @OneToMany(() => CartItem, (item) => item.cart)
   items?: CartItem[];
 }
-

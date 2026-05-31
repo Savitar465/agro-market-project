@@ -8,7 +8,10 @@ export class FilterProductBySellerDto {
   @IsString()
   sellerId?: string;
 
-  @ApiProperty({ required: false, description: 'Search by product name (partial match)' })
+  @ApiProperty({
+    required: false,
+    description: 'Search by product name (partial match)',
+  })
   @IsOptional()
   @IsString()
   name?: string;
@@ -32,12 +35,20 @@ export class FilterProductBySellerDto {
   @Min(0)
   maxPrice?: number;
 
-  @ApiProperty({ required: false, description: 'Sort by field (name, price, rating, createDateTime)', default: 'createDateTime' })
+  @ApiProperty({
+    required: false,
+    description: 'Sort by field (name, price, rating, createDateTime)',
+    default: 'createDateTime',
+  })
   @IsOptional()
   @IsString()
   sortBy?: string;
 
-  @ApiProperty({ required: false, description: 'Sort order (ASC or DESC)', default: 'DESC' })
+  @ApiProperty({
+    required: false,
+    description: 'Sort order (ASC or DESC)',
+    default: 'DESC',
+  })
   @IsOptional()
   @IsString()
   sortOrder?: 'ASC' | 'DESC';
@@ -57,4 +68,3 @@ export class FilterProductBySellerDto {
   @Max(100)
   limit?: number;
 }
-

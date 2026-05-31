@@ -18,10 +18,7 @@ describe('CartService', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        CartService,
-        { provide: CART_REPOSITORY, useValue: repo },
-      ],
+      providers: [CartService, { provide: CART_REPOSITORY, useValue: repo }],
     }).compile();
 
     service = moduleRef.get(CartService);
@@ -37,7 +34,10 @@ describe('CartService', () => {
   });
 
   it('delegates checkout to repository', async () => {
-    repo.checkout.mockResolvedValue({ id: 'cart-1', status: 'PURCHASED' } as any);
+    repo.checkout.mockResolvedValue({
+      id: 'cart-1',
+      status: 'PURCHASED',
+    } as any);
 
     const result = await service.checkout('user-1');
 
@@ -45,4 +45,3 @@ describe('CartService', () => {
     expect(result).toEqual({ id: 'cart-1', status: 'PURCHASED' });
   });
 });
-

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsNumber, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class CoordsDto {
@@ -25,7 +31,11 @@ export class CreateSellerDto {
   @IsString()
   location?: string;
 
-  @ApiProperty({ type: 'string', required: false, description: 'User ID who owns this seller profile' })
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    description: 'User ID who owns this seller profile',
+  })
   @IsOptional()
   @IsString()
   userId?: string;
@@ -34,12 +44,11 @@ export class CreateSellerDto {
     type: 'object',
     properties: {
       lat: { type: 'number' },
-      lng: { type: 'number' }
-    }
+      lng: { type: 'number' },
+    },
   })
   @IsOptional()
   @ValidateNested()
   @Type(() => CoordsDto)
   coords?: CoordsDto;
 }
-

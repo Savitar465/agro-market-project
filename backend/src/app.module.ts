@@ -1,11 +1,11 @@
-import {Module} from '@nestjs/common';
-import {UsersModule} from './users/users.module';
-import {ProductsModule} from './products/products.module';
-import {TypeOrmModule} from "@nestjs/typeorm";
-import {configService} from "./config/config.service";
-import {AuthModule} from './auth/auth.module';
-import {ThrottlerGuard, ThrottlerModule} from "@nestjs/throttler";
-import {APP_GUARD} from "@nestjs/core";
+import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+import { ProductsModule } from './products/products.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { configService } from './config/config.service';
+import { AuthModule } from './auth/auth.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { SellersModule } from './sellers/sellers.module';
 import { CartModule } from './cart/cart.module';
 
@@ -25,7 +25,7 @@ import { CartModule } from './cart/cart.module';
           limit: 10,
         },
       ],
-    })
+    }),
   ],
   controllers: [],
   providers: [

@@ -8,7 +8,7 @@ export class Seller extends BaseEntity {
   name: string;
   @Column({ type: 'varchar', length: 200, nullable: true })
   location?: string;
-  @OneToOne(() => User, user => user.id)
+  @OneToOne(() => User, (user) => user.id)
   user?: User;
   @Column({ type: 'jsonb', nullable: true })
   coords?: {

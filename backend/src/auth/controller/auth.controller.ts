@@ -1,19 +1,37 @@
-import {Body, Controller, HttpCode, HttpStatus, Inject, Post, Req} from '@nestjs/common';
-import {AuthService} from "../services/auth.service";
-import {SigninDto} from "../dto/signin.dto";
-import {AUTH_SERVICE} from "../../common/tokens";
-import {Public} from "../guards/public-auth.decorator";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { AuthService } from '../services/auth.service';
+import { SigninDto } from '../dto/signin.dto';
+import { RegisterDto } from '../dto/register.dto';
+import { AUTH_SERVICE } from '../../common/tokens';
+import { Public } from '../guards/public-auth.decorator';
 import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject(AUTH_SERVICE) private readonly authService: AuthService) {}
+  constructor(
+    @Inject(AUTH_SERVICE) private readonly authService: AuthService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Public()
   @Post('login')
-  async signIn(@Body() dto: SigninDto ) {
-    return this.authService.signIn(dto.username, dto.password)
+  async signIn(@Body() dto: SigninDto) {
+    return this.authService.signIn(dto.username, dto.password);
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Public()
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -24,5 +42,4 @@ export class AuthController {
     await this.authService.logout(token as string);
     return { ok: true };
   }
-
 }

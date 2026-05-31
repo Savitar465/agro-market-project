@@ -37,4 +37,3 @@ export class SellersService implements ISellerService {
     return this.repo.findByUserId(userId);
   }
 }
-

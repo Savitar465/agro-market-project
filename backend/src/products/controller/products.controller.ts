@@ -1,11 +1,28 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
 import { FilterProductBySellerDto } from '../dto/filter-product-by-seller.dto';
 import { IProductsService } from '../services/products.service.interface';
 import { PRODUCTS_SERVICE } from '../../common/tokens';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from '../../auth/rbac/roles.decorator';
 import { Role } from '../../auth/rbac/role.enum';
 import { Public } from '../../auth/guards/public-auth.decorator';
@@ -41,8 +58,8 @@ export class ProductsController {
         total: { type: 'number' },
         page: { type: 'number' },
         limit: { type: 'number' },
-      }
-    }
+      },
+    },
   })
   findWithFilters(@Query() filters: FilterProductDto) {
     return this.productsService.findWithFilters(filters);
@@ -61,10 +78,13 @@ export class ProductsController {
         total: { type: 'number' },
         page: { type: 'number' },
         limit: { type: 'number' },
-      }
-    }
+      },
+    },
   })
-  findBySeller(@Param('sellerId', ParseUUIDPipe) sellerId: string, @Query() filters: FilterProductBySellerDto) {
+  findBySeller(
+    @Param('sellerId', ParseUUIDPipe) sellerId: string,
+    @Query() filters: FilterProductBySellerDto,
+  ) {
     return this.productsService.findBySeller({ ...filters, sellerId });
   }
 
@@ -90,7 +110,11 @@ export class ProductsController {
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateProductDto, @Request() req: any) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProductDto,
+    @Request() req: any,
+  ) {
     const userId = req.user?.sub || 'system';
     return this.productsService.update(id, dto, userId);
   }

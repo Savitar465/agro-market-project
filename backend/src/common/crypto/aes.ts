@@ -16,7 +16,10 @@ function deriveKey(key: string | Buffer): Buffer {
  * Encrypt plaintext using AES-256-CTR.
  * Returns a base64 string containing IV (16 bytes) + ciphertext.
  */
-export function encryptAES256CTR(plaintext: string | Buffer, key: string | Buffer): string {
+export function encryptAES256CTR(
+  plaintext: string | Buffer,
+  key: string | Buffer,
+): string {
   const derivedKey = deriveKey(key);
   const iv = crypto.randomBytes(16); // 128-bit IV for CTR
   const cipher = crypto.createCipheriv('aes-256-ctr', derivedKey, iv);
@@ -28,14 +31,20 @@ export function encryptAES256CTR(plaintext: string | Buffer, key: string | Buffe
  * Decrypt a base64 string produced by encryptAES256CTR.
  * Accepts the same key used to encrypt.
  */
-export function decryptAES256CTR(dataB64: string, key: string | Buffer): string {
+export function decryptAES256CTR(
+  dataB64: string,
+  key: string | Buffer,
+): string {
   const buf = Buffer.from(dataB64, 'base64');
   if (buf.length < 17) throw new Error('Invalid data');
   const iv = buf.slice(0, 16);
   const ciphertext = buf.slice(16);
   const derivedKey = deriveKey(key);
   const decipher = crypto.createDecipheriv('aes-256-ctr', derivedKey, iv);
-  const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final(),
+  ]);
   return decrypted.toString();
 }
 
@@ -43,4 +52,3 @@ export default {
   encryptAES256CTR,
   decryptAES256CTR,
 };
-

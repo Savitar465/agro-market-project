@@ -1,21 +1,20 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {Repository} from 'typeorm';
-import {User} from '../entities/user.entity';
-import {CreateUserDto} from '../dto/create-user.dto';
-import {UpdateUserDto} from '../dto/update-user.dto';
-import {IUserRepository} from './users.repository.interface';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { IUserRepository } from './users.repository.interface';
 
 @Injectable()
 export class UsersRepository implements IUserRepository {
   constructor(
     @InjectRepository(User)
     private readonly repo: Repository<User>,
-  ) {
-  }
+  ) {}
 
-  async findOneByUsername(username: string): Promise<User|null> {
-    return await this.repo.findOneBy({username: username});
+  async findOneByUsername(username: string): Promise<User | null> {
+    return await this.repo.findOneBy({ username: username });
   }
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -30,11 +29,10 @@ export class UsersRepository implements IUserRepository {
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.repo.findOneBy({id});
+    const user = await this.repo.findOneBy({ id });
     if (!user) throw new NotFoundException(`User ${id} not found`);
     return user;
   }
-
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);

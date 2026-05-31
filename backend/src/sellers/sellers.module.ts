@@ -22,5 +22,3 @@ import { SELLERS_REPOSITORY, SELLERS_SERVICE } from '../common/tokens';
   exports: [SELLERS_SERVICE, SELLERS_REPOSITORY],
 })
 export class SellersModule {}
-
-

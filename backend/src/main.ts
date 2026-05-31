@@ -1,16 +1,23 @@
-import {NestFactory} from '@nestjs/core';
-import {AppModule} from './app.module';
-import {ValidationPipe} from '@nestjs/common';
-import {SwaggerModule} from "@nestjs/swagger";
-import {configService} from "./config/config.service";
-import helmet from "helmet";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
+import { configService } from './config/config.service';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // app.use(helmet())
-  app.useGlobalPipes(new ValidationPipe({whitelist: true, forbidNonWhitelisted: true, transform: true}));
-  const documentFactory = () => SwaggerModule.createDocument(app, configService.openApiConfig);
-  SwaggerModule.setup('api', app, documentFactory)
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, configService.openApiConfig);
+  SwaggerModule.setup('api', app, documentFactory);
 
   // CORS configuration
   // Default allowed origins: common localhost ports + production domain
@@ -25,9 +32,11 @@ async function bootstrap() {
   ];
 
   // Allow overriding via comma-separated env var: CORS_ALLOWED_ORIGINS
-  const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || defaultAllowed.join(','))
+  const allowedOrigins = (
+    process.env.CORS_ALLOWED_ORIGINS || defaultAllowed.join(',')
+  )
     .split(',')
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
 
   app.enableCors({
@@ -36,10 +45,12 @@ async function bootstrap() {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       // support simple wildcard matching like '*.agromarket.com' if provided
-      const matched = allowedOrigins.some(pattern => {
+      const matched = allowedOrigins.some((pattern) => {
         if (!pattern.includes('*')) return false;
         // convert wildcard pattern to regex
-        const regex = new RegExp('^' + pattern.split('*').map(escapeRegex).join('.*') + '$');
+        const regex = new RegExp(
+          '^' + pattern.split('*').map(escapeRegex).join('.*') + '$',
+        );
         return regex.test(origin);
       });
       if (matched) return callback(null, true);

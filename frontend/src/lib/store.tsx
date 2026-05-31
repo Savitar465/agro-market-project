@@ -110,7 +110,7 @@ export function StoreProvider({
           itemId: item.id,
           productId: item.productId,
           quantity: item.quantity,
-          product: product || item.product,
+          product: product ?? (item.product as Product | undefined),
         };
       });
       setCart(normalizedCart);

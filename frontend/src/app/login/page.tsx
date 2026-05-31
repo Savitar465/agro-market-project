@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, isAuthLoading, login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +25,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(username, password);
       router.push("/store");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to login");
@@ -41,14 +41,14 @@ export default function LoginPage() {
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+            Username
           </label>
           <input
             id="username"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
           />
         </div>
@@ -79,7 +79,10 @@ export default function LoginPage() {
       </form>
 
       <p className="mt-4 text-center text-sm text-gray-600">
-        Go back to <Link href="/store" className="text-indigo-600 hover:text-indigo-500">store</Link>
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-indigo-600 hover:text-indigo-500">
+          Create one
+        </Link>
       </p>
     </div>
   );
