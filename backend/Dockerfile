@@ -1,39 +1,39 @@
 # Multi-stage Dockerfile for NestJS app (agro-market)
-# Builder stage: installs dev deps and builds TypeScript
-FROM node:18-bullseye AS builder
 
-# Create app directory
+# ---- Builder stage: install all deps (incl. dev) and build TypeScript ----
+FROM node:22-bookworm AS builder
+
 WORKDIR /usr/src/app
 
-# Install build-time dependencies and deps
 # Copy package manifests first to leverage Docker layer caching
 COPY package*.json ./
 
-# Use npm ci when package-lock.json is present for reproducible builds; fallback to npm install
+# Use npm ci when package-lock.json is present for reproducible builds; fallback to npm install.
+# Full toolchain (python/make/g++) is available here so native deps like bcrypt build cleanly.
 RUN npm ci --legacy-peer-deps --no-audit --no-fund || npm install --legacy-peer-deps --no-audit --no-fund
 
 # Copy source and build
 COPY . .
 RUN npm run build
 
-# Production image
-FROM node:18-bullseye-slim AS runner
+# Strip dev dependencies in place so the already-built native modules (bcrypt)
+# can be copied as-is into the slim runner, which has no compiler toolchain.
+RUN npm prune --omit=dev --legacy-peer-deps
+
+# ---- Production image ----
+FROM node:22-bookworm-slim AS runner
 WORKDIR /usr/src/app
 
-ENV NODE_ENV=production
-
-# Copy package manifests and install only production deps
-COPY package*.json ./
-RUN npm ci --only=production --no-audit --no-fund || npm install --only=production --no-audit --no-fund
-
-# Copy built output from builder
+# Copy production node_modules, built output and manifests from the builder
+COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/package*.json ./
 
-# Ensure runtime files are owned by the 'node' user (official image provides node user)
-RUN chown -R node:node /usr/src/app
+# Run as the unprivileged 'node' user provided by the official image
 USER node
 
-EXPOSE 3000
+# Matches the app's default port (process.env.PORT ?? 3001) and docker-compose mapping
+EXPOSE 3001
 
-# Default command — use the same entrypoint as package.json start:prod
+# Default command — same entrypoint as package.json start:prod
 CMD ["node", "dist/main.js"]

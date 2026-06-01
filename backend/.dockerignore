@@ -1,0 +1,26 @@
+node_modules
+dist
+coverage
+npm-debug.log*
+
+# Local env / secrets — never bake into the image
+.env
+.env.*
+!.env.example
+
+# Git / CI / editor
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Tests & docs
+test
+**/*.spec.ts
+README.md
