@@ -36,9 +36,7 @@ export class StripeService {
 
   constructor() {
     // Pin to the SDK's bundled API version (omitting `apiVersion` uses it).
-    this.stripe = this.config.mock
-      ? null
-      : new Stripe(this.config.secretKey);
+    this.stripe = this.config.mock ? null : new Stripe(this.config.secretKey);
 
     if (this.config.mock) {
       this.logger.warn(

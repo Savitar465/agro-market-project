@@ -11,10 +11,7 @@ import { Repository } from 'typeorm';
 import { CART_SERVICE } from '../../common/tokens';
 import { ICartService } from '../../cart/services/cart.service.interface';
 import { Payment } from '../entities/payment.entity';
-import {
-  PaymentMethod,
-  PaymentStatus,
-} from '../entities/payment-status.enum';
+import { PaymentMethod, PaymentStatus } from '../entities/payment-status.enum';
 import { CreateCheckoutSessionDto } from '../dto/create-checkout-session.dto';
 import {
   CheckoutSessionResult,
@@ -158,7 +155,9 @@ export class PaymentsService implements IPaymentsService {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as { metadata?: Record<string, string> };
+        const session = event.data.object as {
+          metadata?: Record<string, string>;
+        };
         const paymentId = session.metadata?.paymentId;
         if (paymentId) {
           const payment = await this.paymentRepo.findOne({
@@ -171,7 +170,9 @@ export class PaymentsService implements IPaymentsService {
         break;
       }
       case 'checkout.session.expired': {
-        const session = event.data.object as { metadata?: Record<string, string> };
+        const session = event.data.object as {
+          metadata?: Record<string, string>;
+        };
         const paymentId = session.metadata?.paymentId;
         if (paymentId) {
           await this.paymentRepo.update(

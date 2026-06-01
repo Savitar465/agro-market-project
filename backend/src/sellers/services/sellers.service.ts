@@ -64,7 +64,9 @@ export class SellersService implements ISellerService {
     }
 
     if (seller.userId !== user.sub) {
-      throw new ForbiddenException('You can only manage your own seller profile');
+      throw new ForbiddenException(
+        'You can only manage your own seller profile',
+      );
     }
     return seller;
   }

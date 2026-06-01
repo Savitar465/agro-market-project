@@ -20,6 +20,8 @@ export class MinioService implements OnModuleInit {
       endPoint: this.config.endPoint,
       port: this.config.port,
       useSSL: this.config.useSSL,
+      region: this.config.region,
+      pathStyle: true,
       accessKey: this.config.accessKey,
       secretKey: this.config.secretKey,
     });
@@ -27,6 +29,11 @@ export class MinioService implements OnModuleInit {
 
   /** Ensure the bucket exists and is publicly readable for serving images. */
   async onModuleInit(): Promise<void> {
+    // R2 manages buckets and public access from its dashboard and rejects the
+    // S3 makeBucket/setBucketPolicy APIs, so skip self-management for it.
+    if (!this.config.manageBucket) {
+      return;
+    }
     try {
       const exists = await this.client.bucketExists(this.config.bucket);
       if (!exists) {
@@ -71,8 +78,14 @@ export class MinioService implements OnModuleInit {
       throw new InternalServerErrorException('Failed to upload image');
     }
 
+    // MinIO serves objects under /<bucket>/<object>; R2's public (r2.dev or
+    // custom-domain) base maps directly to the object key.
+    const base = this.config.publicIncludesBucket
+      ? `${this.config.publicUrl}/${this.config.bucket}`
+      : this.config.publicUrl;
+
     return {
-      url: `${this.config.publicUrl}/${this.config.bucket}/${objectName}`,
+      url: `${base}/${objectName}`,
       objectName,
     };
   }

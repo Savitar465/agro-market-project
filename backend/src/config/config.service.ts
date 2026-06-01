@@ -81,8 +81,20 @@ class ConfigService {
       synchronize: false,
       migrations: [isTsNode ? 'src/migrations/*.ts' : 'dist/migrations/*.js'],
 
-      ssl: this.isProduction(),
+      ssl: this.getPostgresSsl(),
     };
+  }
+
+  private getPostgresSsl(): boolean | { rejectUnauthorized: boolean } {
+    // SSL is decoupled from MODE so a DEV run can still reach a remote DB that
+    // mandates TLS (e.g. Render/Supabase). POSTGRES_SSL overrides; otherwise
+    // default to production. rejectUnauthorized:false accepts the provider's
+    // managed cert chain (Render presents a non-public-CA cert).
+    const sslEnv = this.getValue('POSTGRES_SSL', false);
+    const enabled = sslEnv
+      ? sslEnv.toLowerCase() === 'true'
+      : this.isProduction();
+    return enabled ? { rejectUnauthorized: false } : false;
   }
 
   public getStripeConfig() {
@@ -109,16 +121,43 @@ class ConfigService {
   }
 
   public getMinioConfig() {
-    const endPoint =
+    const rawEndpoint =
       this.getValue('MINIO_ENDPOINT', false) || '192.168.100.150';
+    // Accept either a bare host (MinIO) or a full URL such as R2's
+    // https://<account>.r2.cloudflarestorage.com. Strip the scheme/path so the
+    // S3 client receives a hostname, and remember whether SSL was implied.
+    const schemeMatch = /^(https?):\/\//i.exec(rawEndpoint);
+    const endPoint = rawEndpoint
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*$/, '');
+
+    const sslEnv = this.getValue('MINIO_USE_SSL', false);
+    const useSSL = sslEnv
+      ? sslEnv.toLowerCase() === 'true'
+      : schemeMatch
+        ? schemeMatch[1].toLowerCase() === 'https'
+        : false;
+
     const port = Number.parseInt(
-      this.getValue('MINIO_PORT', false) || '9000',
+      this.getValue('MINIO_PORT', false) || (useSSL ? '443' : '9000'),
       10,
     );
-    const useSSL =
-      (this.getValue('MINIO_USE_SSL', false) || 'false').toLowerCase() ===
-      'true';
+    // R2 (and most S3 providers) require an explicit region; "auto" works for R2.
+    const region = this.getValue('MINIO_REGION', false) || 'auto';
     const bucket = this.getValue('MINIO_BUCKET', false) || 'product-images';
+
+    // R2 manages buckets/public access from its dashboard and rejects the S3
+    // makeBucket/setBucketPolicy calls — set MINIO_MANAGE_BUCKET=false for R2.
+    const manageBucket =
+      (this.getValue('MINIO_MANAGE_BUCKET', false) || 'true').toLowerCase() ===
+      'true';
+    // MinIO public URLs are <base>/<bucket>/<object>; R2 r2.dev / custom-domain
+    // URLs map straight to the object (no bucket segment).
+    const publicIncludesBucket =
+      (
+        this.getValue('MINIO_PUBLIC_INCLUDES_BUCKET', false) || 'true'
+      ).toLowerCase() === 'true';
+
     const publicUrl =
       this.getValue('MINIO_PUBLIC_URL', false) ||
       `${useSSL ? 'https' : 'http'}://${endPoint}:${port}`;
@@ -127,9 +166,12 @@ class ConfigService {
       endPoint,
       port,
       useSSL,
+      region,
       accessKey: this.getValue('MINIO_ACCESS_KEY', false) || 'minioadmin',
       secretKey: this.getValue('MINIO_SECRET_KEY', false) || 'minioadmin',
       bucket,
+      manageBucket,
+      publicIncludesBucket,
       // Base URL used to build publicly reachable object links.
       publicUrl: publicUrl.replace(/\/+$/, ''),
     };

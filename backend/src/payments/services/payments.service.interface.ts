@@ -28,5 +28,8 @@ export interface IPaymentsService {
   ): Promise<CheckoutSessionResult>;
   getStatus(userId: string, paymentId: string): Promise<PaymentStatusResult>;
   confirmMock(userId: string, paymentId: string): Promise<PaymentStatusResult>;
-  handleWebhook(rawBody: Buffer, signature: string): Promise<{ received: true }>;
+  handleWebhook(
+    rawBody: Buffer,
+    signature: string,
+  ): Promise<{ received: true }>;
 }
