@@ -3,6 +3,7 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
 import { FilterProductBySellerDto } from '../dto/filter-product-by-seller.dto';
 import { Product } from '../entities/product.entity';
+import { ProductStatus } from '../entities/product-status.enum';
 
 export interface IProductRepository {
   create(dto: CreateProductDto, userId: string): Promise<Product>;
@@ -13,7 +14,15 @@ export interface IProductRepository {
   findBySeller(
     filters: FilterProductBySellerDto,
   ): Promise<{ data: Product[]; total: number; page: number; limit: number }>;
+  findInventoryBySeller(sellerId: string): Promise<Product[]>;
   findOne(id: string): Promise<Product>;
+  findById(id: string): Promise<Product>;
   update(id: string, dto: UpdateProductDto, userId: string): Promise<Product>;
+  setStatus(
+    id: string,
+    status: ProductStatus,
+    userId: string,
+  ): Promise<Product>;
+  setStock(id: string, stock: number, userId: string): Promise<Product>;
   remove(id: string): Promise<void>;
 }

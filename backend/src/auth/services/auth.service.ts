@@ -16,7 +16,7 @@ import * as bcrypt from 'bcrypt';
 import { TokenRevocationService } from './token-revocation.service';
 import { RegisterDto } from '../dto/register.dto';
 import { Role } from '../rbac/role.enum';
-import { User } from '../../users/entities/user.entity';
+import { SafeUser } from '../../users/services/users.service.interface';
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
@@ -72,7 +72,7 @@ export class AuthService implements IAuthService {
     }
   }
 
-  private async buildAuthResult(user: User): Promise<AuthResult> {
+  private async buildAuthResult(user: SafeUser): Promise<AuthResult> {
     const payload = {
       username: user.username,
       sub: user.id,

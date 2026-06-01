@@ -1,6 +1,7 @@
 import { BaseEntity } from '../../common/base/base.entity';
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Seller } from '../../sellers/entities/seller.entity';
+import { ProductStatus } from './product-status.enum';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -10,9 +11,9 @@ export class Product extends BaseEntity {
   price: number;
   @Column({ type: 'varchar', length: 200, nullable: true })
   unit?: string;
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 500 })
   image: string;
-  @Column({ type: 'varchar', length: 200, array: true, nullable: true })
+  @Column({ type: 'varchar', length: 500, array: true, nullable: true })
   images?: string[];
   @Column({ type: 'text' })
   description: string;
@@ -22,6 +23,15 @@ export class Product extends BaseEntity {
   stock?: number;
   @Column({ type: 'numeric', nullable: true })
   rating?: number;
-  @ManyToOne(() => Seller, (seller) => seller.id, { nullable: true })
+  @Column({
+    type: 'enum',
+    enum: ProductStatus,
+    default: ProductStatus.Published,
+  })
+  status: ProductStatus;
+  @ManyToOne(() => Seller, { nullable: true })
+  @JoinColumn({ name: 'sellerId' })
   seller?: Seller;
+  @Column({ type: 'uuid', nullable: true })
+  sellerId?: string;
 }

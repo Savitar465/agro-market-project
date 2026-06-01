@@ -80,6 +80,33 @@ class ConfigService {
     };
   }
 
+  public getMinioConfig() {
+    const endPoint =
+      this.getValue('MINIO_ENDPOINT', false) || '192.168.100.150';
+    const port = Number.parseInt(
+      this.getValue('MINIO_PORT', false) || '9000',
+      10,
+    );
+    const useSSL =
+      (this.getValue('MINIO_USE_SSL', false) || 'false').toLowerCase() ===
+      'true';
+    const bucket = this.getValue('MINIO_BUCKET', false) || 'product-images';
+    const publicUrl =
+      this.getValue('MINIO_PUBLIC_URL', false) ||
+      `${useSSL ? 'https' : 'http'}://${endPoint}:${port}`;
+
+    return {
+      endPoint,
+      port,
+      useSSL,
+      accessKey: this.getValue('MINIO_ACCESS_KEY', false) || 'minioadmin',
+      secretKey: this.getValue('MINIO_SECRET_KEY', false) || 'minioadmin',
+      bucket,
+      // Base URL used to build publicly reachable object links.
+      publicUrl: publicUrl.replace(/\/+$/, ''),
+    };
+  }
+
   public openApiConfig = new DocumentBuilder()
     .setTitle('Market API')
     .setDescription('The market API documentation')

@@ -1,5 +1,13 @@
-import { IsArray, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductStatus } from '../entities/product-status.enum';
 
 export class UpdateProductDto {
   @ApiProperty({ required: false })
@@ -23,9 +31,10 @@ export class UpdateProductDto {
   @IsString()
   image?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   images?: string[];
 
   @ApiProperty({ required: false })
@@ -50,9 +59,14 @@ export class UpdateProductDto {
   @Min(0)
   rating?: number;
 
+  @ApiProperty({ required: false, enum: ProductStatus })
+  @IsOptional()
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
+
   @ApiProperty({
     required: false,
-    description: 'Seller ID who owns this product',
+    description: 'Seller ID who owns this product (admin only)',
   })
   @IsOptional()
   @IsString()

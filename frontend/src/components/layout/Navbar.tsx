@@ -159,13 +159,51 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
 
                         <div className="space-y-2 border-t border-gray-200 px-4 py-6">
                             {isAuthenticated ? (
-                                <button
-                                    type="button"
-                                    onClick={handleLogout}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700"
-                                >
-                                    Logout
-                                </button>
+                                <>
+                                    {canSell && (
+                                        <>
+                                            <Link
+                                                href="/inventory"
+                                                className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                            >
+                                                Mi inventario
+                                            </Link>
+                                            <Link
+                                                href="/sell"
+                                                className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                            >
+                                                Publicar producto
+                                            </Link>
+                                            <Link
+                                                href="/sellers/create"
+                                                className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                            >
+                                                Mi perfil de vendedor
+                                            </Link>
+                                        </>
+                                    )}
+                                    <Link
+                                        href="/profile"
+                                        className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                    >
+                                        Profile
+                                    </Link>
+                                    {isAdmin && (
+                                        <Link
+                                            href="/admin/users"
+                                            className="block rounded-md border border-gray-300 px-3 py-2 text-center text-sm font-medium text-gray-700"
+                                        >
+                                            Users
+                                        </Link>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
                             ) : (
                                 <>
                                     <Link
@@ -327,20 +365,25 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                                                     <div className="grid grid-cols-1 gap-y-10 py-16">
                                                         <ul>
+                                                            {sellers.length === 0 && (
+                                                                <li className="text-gray-500">No sellers yet</li>
+                                                            )}
                                                             {sellers.map((seller) => (
                                                                 <li key={seller.id}>
-                                                                    <a href={`/sellers/${seller.id}`}
+                                                                    <Link href={`/sellers/${seller.id}`}
                                                                           className="font-medium text-gray-900 hover:text-gray-700">
                                                                         {seller.name}
-                                                                    </a>
+                                                                    </Link>
                                                                 </li>
                                                             ))}
-                                                            <li>
-                                                                <a href="/sellers/create"
-                                                                      className="font-medium text-indigo-600 hover:text-indigo-500">
-                                                                    Create a Seller
-                                                                </a>
-                                                            </li>
+                                                            {canSell && (
+                                                                <li className="mt-4 border-t border-gray-100 pt-4">
+                                                                    <Link href="/sellers/create"
+                                                                          className="font-medium text-indigo-600 hover:text-indigo-500">
+                                                                        Mi perfil de vendedor
+                                                                    </Link>
+                                                                </li>
+                                                            )}
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -377,9 +420,13 @@ export default function Navbar({children}: Readonly<{ children: React.ReactNode;
                                             {canSell && (
                                                 <>
                                                     <Link href="/inventory" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Inventory</Link>
-                                                    <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Sell</Link>
+                                                    <Link href="/sell" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">Add Product</Link>
                                                 </>
                                             )}
+                                            {isAdmin && (
+                                                <Link href="/admin/users" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Users</Link>
+                                            )}
+                                            <Link href="/profile" className="text-sm font-medium text-gray-700 hover:text-indigo-500">Profile</Link>
                                             <button
                                                 type="button"
                                                 onClick={handleLogout}

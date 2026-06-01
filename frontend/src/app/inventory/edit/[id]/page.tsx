@@ -2,39 +2,73 @@
 
 import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
-import {categories, Product} from '@/data/products'
+import {categories, Product, ProductStatus} from '@/data/products'
 import {useForm} from "react-hook-form";
-import {useEffect, use} from "react";
-import React from 'react';
+import {useEffect, useState, use} from "react";
+import ImageUploader from '@/components/products/ImageUploader'
+
+type ProductFormValues = Omit<Product, 'id' | 'image' | 'images' | 'seller'>
 
 export default function EditProductPage({params}: { params: Promise<{ id: string }> }) {
     const {id} = use(params)
-    const {products, productsLoading, updateProduct} = useStore()
+    const {inventory, inventoryLoading, refreshInventory, updateProduct} = useStore()
     const router = useRouter()
-    const product = products.find(p => p.id === id)
+    const product = inventory.find(p => p.id === id)
 
-    const {register, handleSubmit, reset} = useForm<Product>()
+    const {register, handleSubmit, reset, formState: {isSubmitting}} = useForm<ProductFormValues>()
+    const [images, setImages] = useState<string[]>([])
+    const [formError, setFormError] = useState<string | null>(null)
+
+    // Load the seller inventory if the user landed here directly.
+    useEffect(() => {
+        if (inventory.length === 0) {
+            void refreshInventory()
+        }
+    }, [inventory.length, refreshInventory])
 
     useEffect(() => {
         if (product) {
-            reset(product)
+            reset({
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                unit: product.unit,
+                category: product.category,
+                stock: product.stock,
+                status: product.status,
+            })
+            setImages(product.images && product.images.length > 0
+                ? product.images
+                : product.image ? [product.image] : [])
         }
     }, [product, reset])
 
-    if (productsLoading) {
+    if (inventoryLoading && !product) {
         return <div>Loading product...</div>
     }
 
     if (!product) {
-        return <div>Product not found</div>
+        return <div>Product not found in your inventory</div>
     }
 
-    const onSubmit = async (data: Product) => {
+    const onSubmit = async (data: ProductFormValues) => {
+        setFormError(null)
+
+        if (images.length === 0) {
+            setFormError('Please keep at least one product image.')
+            return
+        }
+
         try {
-            await updateProduct({...data, id: id})
+            await updateProduct({
+                ...product,
+                ...data,
+                image: images[0],
+                images,
+            })
             router.push('/inventory')
         } catch (error) {
-            alert(error instanceof Error ? error.message : 'Unable to update product')
+            setFormError(error instanceof Error ? error.message : 'Unable to update product')
         }
     }
 
@@ -65,6 +99,25 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                             </div>
                         </div>
 
+                        <div className="sm:col-span-2">
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                                Status
+                            </label>
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[select:focus-within]:outline-2 has-[select:focus-within]:-outline-offset-2 has-[select:focus-within]:outline-indigo-600">
+                                <select
+                                    {...register('status')}
+                                    id="status"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 focus:outline-none sm:text-sm"
+                                >
+                                    <option value={"PUBLISHED" satisfies ProductStatus}>Published</option>
+                                    <option value={"SUSPENDED" satisfies ProductStatus}>Suspended</option>
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="sm:col-span-6">
                             <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                                 Description
@@ -82,7 +135,7 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                             </div>
                         </div>
 
-                        <div className="sm:col-span-3">
+                        <div className="sm:col-span-2">
                             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
                                 Price
                             </label>
@@ -90,7 +143,7 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                                 <div
                                     className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
-                                    {...register('price', {required: true, valueAsNumber: true})}
+                                    {...register('price', {required: true, valueAsNumber: true, min: 0})}
                                     type="number"
                                     id="price"
                                     step="0.01"
@@ -100,13 +153,30 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                             </div>
                         </div>
 
-                        <div className="sm:col-span-3">
+                        <div className="sm:col-span-2">
+                            <label htmlFor="unit" className="block text-sm font-medium text-gray-700">
+                                Unit
+                            </label>
+                            <div className="mt-2">
+                                <div
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
+                                <input
+                                    {...register('unit')}
+                                    type="text"
+                                    id="unit"
+                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
+                                />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="sm:col-span-2">
                             <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                                 Category
                             </label>
                             <div className="mt-2">
                                 <div
-                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
+                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[select:focus-within]:outline-2 has-[select:focus-within]:-outline-offset-2 has-[select:focus-within]:outline-indigo-600">
                                 <select
                                     {...register('category', {required: true})}
                                     id="category"
@@ -127,7 +197,7 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                                 <div
                                     className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
                                 <input
-                                    {...register('stock', {required: true, valueAsNumber: true})}
+                                    {...register('stock', {required: true, valueAsNumber: true, min: 0})}
                                     type="number"
                                     id="stock"
                                     className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
@@ -137,24 +207,18 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                         </div>
 
                         <div className="sm:col-span-6">
-                            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                                Image URL
+                            <label className="block text-sm font-medium text-gray-700">
+                                Product images
                             </label>
                             <div className="mt-2">
-                                <div
-                                    className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
-                                <input
-                                    {...register('image', {required: true})}
-                                    type="url"
-                                    id="image"
-                                    className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
-                                />
-                                </div>
+                                <ImageUploader value={images} onChange={setImages} />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {formError && <p className="pt-4 text-sm text-red-600">{formError}</p>}
 
             <div className="pt-5">
                 <div className="flex justify-end">
@@ -167,9 +231,10 @@ export default function EditProductPage({params}: { params: Promise<{ id: string
                     </button>
                     <button
                         type="submit"
-                        className="ml-3 inline-flex justify-center cursor-pointer rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        disabled={isSubmitting}
+                        className="ml-3 inline-flex justify-center cursor-pointer rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
                     >
-                        Save Changes
+                        {isSubmitting ? 'Saving…' : 'Save Changes'}
                     </button>
                 </div>
             </div>

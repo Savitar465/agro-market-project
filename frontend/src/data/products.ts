@@ -3,6 +3,8 @@ export type Coordinates = {
   lng: number;
 };
 
+export type ProductStatus = "PUBLISHED" | "SUSPENDED";
+
 export type Product = {
   id: string;
   name: string;
@@ -14,6 +16,7 @@ export type Product = {
   category: string;
   stock?: number;
   rating?: number;
+  status?: ProductStatus;
   seller?: {
     id: string;
     name: string;

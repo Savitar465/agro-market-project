@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
+import { ProductStatus } from '../entities/product-status.enum';
 
 export class CreateProductDto {
   @ApiProperty()
@@ -30,9 +32,10 @@ export class CreateProductDto {
   @IsString()
   image: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: [String] })
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   images?: string[];
 
   @ApiProperty()
@@ -59,7 +62,17 @@ export class CreateProductDto {
 
   @ApiProperty({
     required: false,
-    description: 'Seller ID who owns this product',
+    enum: ProductStatus,
+    description: 'Publication status. Defaults to PUBLISHED.',
+  })
+  @IsOptional()
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Seller ID who owns this product. Ignored for non-admin users (derived from the authenticated seller).',
   })
   @IsOptional()
   @IsString()

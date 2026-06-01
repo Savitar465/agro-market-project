@@ -1,4 +1,4 @@
-import type { Product } from "@/data/products";
+import type { Product, ProductStatus } from "@/data/products";
 import { sellers as seedSellers } from "@/data/sellers";
 import { apiRequest } from "@/lib/services/http-client";
 
@@ -14,6 +14,7 @@ type CreateProductDto = {
   category: string;
   stock?: number;
   rating?: number;
+  status?: ProductStatus;
   sellerId?: string;
 };
 
@@ -23,6 +24,7 @@ type ProductPayload = Omit<Product, "id"> & { id?: string };
 
 type ApiProduct = Partial<Product> & {
   id?: string;
+  status?: ProductStatus;
   sellerId?: string;
   seller?: {
     id?: string;
@@ -40,6 +42,7 @@ function toCreateDto(
   product: ProductPayload,
   sellerId?: string,
 ): CreateProductDto {
+  const resolvedSellerId = sellerId || product.seller?.id;
   return {
     name: product.name,
     price: product.price,
@@ -50,7 +53,13 @@ function toCreateDto(
     category: product.category,
     stock: product.stock,
     rating: product.rating,
-    sellerId: sellerId || product.seller?.id,
+    status: product.status,
+    // Only forward a real seller id; the backend derives the seller from the
+    // authenticated user when this is omitted.
+    sellerId:
+      resolvedSellerId && resolvedSellerId !== "default"
+        ? resolvedSellerId
+        : undefined,
   };
 }
 
@@ -65,7 +74,7 @@ function toUpdateDto(product: ProductPayload): UpdateProductDto {
     category: product.category,
     stock: product.stock,
     rating: product.rating,
-    sellerId: product.seller?.id,
+    status: product.status,
   };
 }
 
@@ -78,14 +87,15 @@ function normalizeProduct(raw: ApiProduct): Product {
   return {
     id: String(raw.id || ""),
     name: raw.name || "",
-    price: raw.price || 0,
+    price: Number(raw.price) || 0,
     unit: raw.unit,
     image: raw.image || "",
     images: raw.images,
     description: raw.description || "",
     category: raw.category || "Pantry",
-    stock: raw.stock,
-    rating: raw.rating,
+    stock: raw.stock !== undefined ? Number(raw.stock) : undefined,
+    rating: raw.rating !== undefined ? Number(raw.rating) : undefined,
+    status: raw.status,
     seller: sellerId
       ? {
           id: sellerId,
@@ -122,6 +132,14 @@ export async function getProductById(id: string): Promise<Product> {
   return normalizeProduct(response);
 }
 
+/** The authenticated seller's own inventory (includes suspended products). */
+export async function getMyProducts(): Promise<Product[]> {
+  const response = await apiRequest<ApiProduct[]>(`${PRODUCTS_PATH}/mine`, {
+    method: "GET",
+  });
+  return (response || []).map(normalizeProduct);
+}
+
 export async function createProduct(
   product: ProductPayload,
   sellerId?: string,
@@ -150,10 +168,25 @@ export async function updateProductStock(
   id: string,
   stock: number,
 ): Promise<Product> {
-  const response = await apiRequest<ApiProduct>(`${PRODUCTS_PATH}/${id}`, {
+  const response = await apiRequest<ApiProduct>(`${PRODUCTS_PATH}/${id}/stock`, {
     method: "PATCH",
     body: JSON.stringify({ stock }),
   });
+
+  return normalizeProduct(response);
+}
+
+export async function setProductStatus(
+  id: string,
+  status: ProductStatus,
+): Promise<Product> {
+  const response = await apiRequest<ApiProduct>(
+    `${PRODUCTS_PATH}/${id}/status`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    },
+  );
 
   return normalizeProduct(response);
 }

@@ -8,6 +8,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { SellersModule } from './sellers/sellers.module';
 import { CartModule } from './cart/cart.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CartModule } from './cart/cart.module';
     SellersModule,
     CartModule,
     AuthModule,
-    SellersModule,
+    UploadsModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
     ThrottlerModule.forRoot({
       throttlers: [

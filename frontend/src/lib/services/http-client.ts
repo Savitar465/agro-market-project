@@ -45,7 +45,12 @@ export async function apiRequest<T>(
   const token = getAuthToken();
   const headers = new Headers(options.headers);
 
-  if (!headers.has("Content-Type")) {
+  // For FormData bodies the browser must set the multipart boundary itself,
+  // so we only default to JSON for non-FormData requests.
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
+
+  if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 

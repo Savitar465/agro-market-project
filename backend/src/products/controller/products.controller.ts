@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
+import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
+import { UpdateStockDto } from '../dto/update-stock.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
 import { FilterProductBySellerDto } from '../dto/filter-product-by-seller.dto';
 import { IProductsService } from '../services/products.service.interface';
@@ -26,6 +28,7 @@ import {
 import { Roles } from '../../auth/rbac/roles.decorator';
 import { Role } from '../../auth/rbac/role.enum';
 import { Public } from '../../auth/guards/public-auth.decorator';
+import { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 @ApiTags('products')
 @ApiBearerAuth()
@@ -40,9 +43,11 @@ export class ProductsController {
   @Roles(Role.Admin, Role.Seller)
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
-  create(@Body() dto: CreateProductDto, @Request() req: any) {
-    const userId = req.user?.sub || 'system';
-    return this.productsService.create(dto, userId);
+  create(
+    @Body() dto: CreateProductDto,
+    @Request() req: { user: AuthenticatedUser },
+  ) {
+    return this.productsService.create(dto, req.user);
   }
 
   @Get('search')
@@ -63,6 +68,16 @@ export class ProductsController {
   })
   findWithFilters(@Query() filters: FilterProductDto) {
     return this.productsService.findWithFilters(filters);
+  }
+
+  @Get('mine')
+  @Roles(Role.Admin, Role.Seller)
+  @ApiOperation({
+    summary: "Get the authenticated seller's own inventory (all statuses)",
+  })
+  @ApiResponse({ status: 200, description: 'Products owned by the seller' })
+  findMine(@Request() req: { user: AuthenticatedUser }) {
+    return this.productsService.findMine(req.user);
   }
 
   @Get('by-seller/:sellerId')
@@ -90,8 +105,8 @@ export class ProductsController {
 
   @Get()
   @Public()
-  @ApiOperation({ summary: 'Get all products' })
-  @ApiResponse({ status: 200, description: 'List of all products' })
+  @ApiOperation({ summary: 'Get all published products' })
+  @ApiResponse({ status: 200, description: 'List of all published products' })
   findAll() {
     return this.productsService.findAll();
   }
@@ -109,23 +124,53 @@ export class ProductsController {
   @Roles(Role.Admin, Role.Seller)
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
+  @ApiResponse({ status: 403, description: 'Not the owner of this product' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProductDto,
-    @Request() req: any,
+    @Request() req: { user: AuthenticatedUser },
   ) {
-    const userId = req.user?.sub || 'system';
-    return this.productsService.update(id, dto, userId);
+    return this.productsService.update(id, dto, req.user);
+  }
+
+  @Patch(':id/status')
+  @Roles(Role.Admin, Role.Seller)
+  @ApiOperation({ summary: 'Publish or suspend a product' })
+  @ApiResponse({ status: 200, description: 'Product status updated' })
+  @ApiResponse({ status: 403, description: 'Not the owner of this product' })
+  setStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProductStatusDto,
+    @Request() req: { user: AuthenticatedUser },
+  ) {
+    return this.productsService.setStatus(id, dto.status, req.user);
+  }
+
+  @Patch(':id/stock')
+  @Roles(Role.Admin, Role.Seller)
+  @ApiOperation({ summary: 'Update a product stock level (inventory)' })
+  @ApiResponse({ status: 200, description: 'Stock updated' })
+  @ApiResponse({ status: 403, description: 'Not the owner of this product' })
+  setStock(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateStockDto,
+    @Request() req: { user: AuthenticatedUser },
+  ) {
+    return this.productsService.setStock(id, dto.stock, req.user);
   }
 
   @Delete(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Seller)
   @ApiOperation({ summary: 'Delete a product (soft delete)' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Not the owner of this product' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
-    await this.productsService.remove(id);
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: { user: AuthenticatedUser },
+  ) {
+    await this.productsService.remove(id, req.user);
     return { message: `Product ${id} removed successfully` };
   }
 }

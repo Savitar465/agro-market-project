@@ -79,15 +79,23 @@ async function seed() {
   }
 
   // ---- Sellers --------------------------------------------------------------
+  // Link the seller storefront to its owning user so the productor can manage
+  // its own inventory once logged in.
+  const sellerUser = await userRepo.findOne({
+    where: { username: 'granja_sol' },
+  });
+
   const sellersSeed: Array<{
     name: string;
     location: string;
     coords: { lat: number; lng: number };
+    ownerUserId?: string;
   }> = [
     {
       name: 'Granja El Sol',
       location: 'Mendoza, Argentina',
       coords: { lat: -32.8895, lng: -68.8458 },
+      ownerUserId: sellerUser?.id,
     },
     {
       name: 'Huerta Orgánica La Esperanza',
@@ -103,13 +111,22 @@ async function seed() {
 
   const sellers: Record<string, Seller> = {};
   for (const s of sellersSeed) {
+    const { ownerUserId, ...sellerData } = s;
     let seller = await sellerRepo.findOne({ where: { name: s.name } });
     if (seller) {
-      console.log(`  seller "${s.name}" already exists — skipping`);
+      // Backfill the owner link for sellers seeded before user association.
+      if (ownerUserId && !seller.userId) {
+        seller.userId = ownerUserId;
+        seller = await sellerRepo.save(seller);
+        console.log(`  linked seller "${s.name}" to its owning user`);
+      } else {
+        console.log(`  seller "${s.name}" already exists — skipping`);
+      }
     } else {
       seller = await sellerRepo.save(
         sellerRepo.create({
-          ...s,
+          ...sellerData,
+          userId: ownerUserId,
           createdBy: AUDIT,
           lastChangedBy: AUDIT,
         }),

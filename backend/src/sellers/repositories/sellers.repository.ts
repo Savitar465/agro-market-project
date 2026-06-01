@@ -14,7 +14,10 @@ export class SellersRepository implements ISellerRepository {
   ) {}
 
   async create(dto: CreateSellerDto, userId: string): Promise<Seller> {
-    const seller: Seller = this.repo.create(dto);
+    const { userId: ownerId, ...rest } = dto;
+    const seller: Seller = this.repo.create(rest);
+    // Link the seller profile to its owning user (defaults to the creator).
+    seller.userId = ownerId ?? userId;
     seller.createdBy = userId;
     seller.lastChangedBy = userId;
     return this.repo.save(seller);

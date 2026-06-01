@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { IUserRepository } from './users.repository.interface';
+import { Role } from '../../auth/rbac/role.enum';
 
 @Injectable()
 export class UsersRepository implements IUserRepository {
@@ -37,6 +38,21 @@ export class UsersRepository implements IUserRepository {
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, dto);
+    user.lastChangedBy = 'origin';
+    return this.repo.save(user);
+  }
+
+  async setRoles(id: string, roles: Role[]): Promise<User> {
+    const user = await this.findOne(id);
+    user.roles = roles;
+    user.lastChangedBy = 'origin';
+    return this.repo.save(user);
+  }
+
+  async setActive(id: string, isActive: boolean): Promise<User> {
+    const user = await this.findOne(id);
+    user.isActive = isActive;
+    user.lastChangedBy = 'origin';
     return this.repo.save(user);
   }
 
