@@ -3,6 +3,7 @@
 import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
 import {useState, use} from 'react'
+import Link from 'next/link'
 import {calculateDistance} from '@/lib/geo'
 import dynamic from 'next/dynamic'
 
@@ -76,13 +77,27 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                 <div className="mx-auto max-w-2xl px-4 pb-16 pt-10 sm:px-6 lg:grid lg:max-w-7xl lg:grid-cols-3 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8 lg:px-8 lg:pb-24 lg:pt-16">
                     <div className="lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{product.name}</h1>
+                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+                                {product.category}
+                            </span>
+                            {typeof product.rating === 'number' && (
+                                <span className="flex items-center gap-1 text-sm font-medium text-amber-600">
+                                    <span aria-hidden="true">★</span>
+                                    {product.rating.toFixed(1)}
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Options */}
                     <div className="mt-4 lg:row-span-3 lg:mt-0">
                         <h2 className="sr-only">Product information</h2>
                         <div className="flex items-center justify-between">
-                            <p className="text-3xl tracking-tight text-gray-900">${product.price}</p>
+                            <p className="text-3xl tracking-tight text-gray-900">
+                                ${product.price}
+                                {product.unit && <span className="ml-2 text-base text-gray-500">{product.unit}</span>}
+                            </p>
                             {product.stock !== undefined && (
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                     {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
@@ -130,7 +145,12 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                                 <h3 className="text-sm font-medium text-gray-900">Seller</h3>
 
                                 <div className="mt-4">
-                                    <p className="text-sm text-gray-600">{product.seller.name}</p>
+                                    <Link
+                                        href={`/sellers/${product.seller.id}`}
+                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                                    >
+                                        {product.seller.name}
+                                    </Link>
                                     <p className="text-sm text-gray-600">{product.seller.location}</p>
                                     {distance !== null && (
                                         <p className="mt-1 text-sm font-medium text-indigo-600">

@@ -23,6 +23,7 @@ import {
 import { Roles } from '../../auth/rbac/roles.decorator';
 import { Role } from '../../auth/rbac/role.enum';
 import { Public } from '../../auth/guards/public-auth.decorator';
+import { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 @ApiTags('sellers')
 @ApiBearerAuth()
@@ -76,10 +77,9 @@ export class SellersController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateSellerDto,
-    @Request() req: any,
+    @Request() req: { user: AuthenticatedUser },
   ) {
-    const userId = req.user?.sub || 'system';
-    return this.sellersService.update(id, dto, userId);
+    return this.sellersService.update(id, dto, req.user);
   }
 
   @Delete(':id')
@@ -87,8 +87,11 @@ export class SellersController {
   @ApiOperation({ summary: 'Delete a seller profile (soft delete)' })
   @ApiResponse({ status: 200, description: 'Seller deleted successfully' })
   @ApiResponse({ status: 404, description: 'Seller not found' })
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
-    await this.sellersService.remove(id);
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Request() req: { user: AuthenticatedUser },
+  ) {
+    await this.sellersService.remove(id, req.user);
     return { message: `Seller ${id} removed successfully` };
   }
 }

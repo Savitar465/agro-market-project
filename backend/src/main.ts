@@ -6,7 +6,8 @@ import { configService } from './config/config.service';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody is needed so the Stripe webhook can verify the payload signature.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   // app.use(helmet())
   app.useGlobalPipes(
     new ValidationPipe({

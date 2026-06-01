@@ -3,20 +3,25 @@ import { DocumentBuilder } from '@nestjs/swagger';
 import { JwtSignOptions } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as fs from 'fs';
 
-// Load environment-specific .env file. Priority:
+// Resolve which environment-specific file to use as defaults. Priority:
 // 1. process.env.MODE
 // 2. process.env.NODE_ENV
 // Fallback to 'development'
 const envName = (process.env.MODE || process.env.NODE_ENV || 'development')
   .toString()
   .toLowerCase();
-const envFile = path.resolve(process.cwd(), `.env.${envName}`);
-// Try to load the specific env file, then fallback to .env
-dotenv.config({ path: envFile });
-if (!process.env.POSTGRES_HOST) {
-  // fallback to generic .env if specific file missing or didn't set vars
-  dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+// Load env files in priority order. dotenv never overrides a variable that is
+// already set, so the FIRST file loaded wins. The generic `.env` (gitignored,
+// your local machine config) therefore takes precedence; `.env.<env>` only
+// supplies defaults for keys `.env` didn't define.
+for (const file of ['.env', `.env.${envName}`]) {
+  const full = path.resolve(process.cwd(), file);
+  if (fs.existsSync(full)) {
+    dotenv.config({ path: full });
+  }
 }
 
 class ConfigService {
@@ -77,6 +82,29 @@ class ConfigService {
       migrations: [isTsNode ? 'src/migrations/*.ts' : 'dist/migrations/*.js'],
 
       ssl: this.isProduction(),
+    };
+  }
+
+  public getStripeConfig() {
+    // When STRIPE_SECRET_KEY is unset the app runs in "mock" payment mode:
+    // checkout sessions resolve to a local simulated-payment page so the full
+    // cart -> pay -> confirm flow is testable without real Stripe credentials.
+    const secretKey = this.getValue('STRIPE_SECRET_KEY', false) || '';
+    const webhookSecret = this.getValue('STRIPE_WEBHOOK_SECRET', false) || '';
+    const currency = (
+      this.getValue('STRIPE_CURRENCY', false) || 'usd'
+    ).toLowerCase();
+    const frontendUrl = (
+      this.getValue('FRONTEND_URL', false) || 'http://localhost:3000'
+    ).replace(/\/+$/, '');
+
+    return {
+      secretKey,
+      webhookSecret,
+      currency,
+      frontendUrl,
+      // Mock mode is active whenever no secret key is configured.
+      mock: secretKey.length === 0,
     };
   }
 

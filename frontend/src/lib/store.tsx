@@ -51,6 +51,7 @@ export type StoreState = {
     refreshSellers: () => Promise<void>;
     addSeller: (name: string) => void;
     cart: CartItem[];
+    cartTotal: number;
     cartLoading: boolean;
     cartError: string | null;
     refreshCart: () => Promise<void>;
@@ -77,6 +78,7 @@ export function StoreProvider({
     const [inventoryError, setInventoryError] = useState<string | null>(null);
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [cartTotal, setCartTotal] = useState<number>(0);
     const [cartLoading, setCartLoading] = useState<boolean>(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [userCoords, setUserCoords] = useState<Coordinates | null>(null);
@@ -132,6 +134,7 @@ export function StoreProvider({
     const refreshCart = useCallback(async () => {
         if (!isAuthenticated) {
             setCart([]);
+            setCartTotal(0);
             return;
         }
 
@@ -150,11 +153,14 @@ export function StoreProvider({
                 };
             });
             setCart(normalizedCart);
+            // Trust the backend's authoritative total over a local recomputation.
+            setCartTotal(Number(cartResponse.total ?? 0));
         } catch (error) {
             setCartError(
                 error instanceof Error ? error.message : "Unable to load cart",
             );
             setCart([]);
+            setCartTotal(0);
         } finally {
             setCartLoading(false);
         }
@@ -173,6 +179,7 @@ export function StoreProvider({
             void refreshCart();
         } else {
             setCart([]);
+            setCartTotal(0);
         }
     }, [isAuthenticated, refreshCart]);
 
@@ -322,6 +329,7 @@ export function StoreProvider({
         try {
             await clearCartRequest();
             setCart([]);
+            setCartTotal(0);
         } catch (error) {
             alert(error instanceof Error ? error.message : "Unable to clear cart");
         }
@@ -336,6 +344,7 @@ export function StoreProvider({
         try {
             await checkoutCartRequest();
             setCart([]);
+            setCartTotal(0);
             await refreshProducts();
         } catch (error) {
             alert(
@@ -363,6 +372,7 @@ export function StoreProvider({
             refreshSellers,
             addSeller,
             cart,
+            cartTotal,
             cartLoading,
             cartError,
             refreshCart,
