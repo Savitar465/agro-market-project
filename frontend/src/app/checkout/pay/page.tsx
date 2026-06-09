@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/format";
 import {
-  type PaymentStatusResult,
   confirmMockPayment,
   getPaymentStatus,
+  type PaymentStatusResult,
 } from "@/lib/services/payments-http";
 
 /**
@@ -99,7 +99,9 @@ function MockPay() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="text-center text-gray-500">Loading…</div>}>
+    <Suspense
+      fallback={<div className="text-center text-gray-500">Loading…</div>}
+    >
       <MockPay />
     </Suspense>
   );

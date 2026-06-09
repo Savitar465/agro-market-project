@@ -3,6 +3,7 @@ import { PaymentMethod, PaymentStatus } from '../entities/payment-status.enum';
 
 export type CheckoutSessionResult = {
   paymentId: string;
+  orderId: string;
   sessionId: string | null;
   url: string;
   method: PaymentMethod;
@@ -14,6 +15,7 @@ export type CheckoutSessionResult = {
 
 export type PaymentStatusResult = {
   paymentId: string;
+  orderId: string | null;
   status: PaymentStatus;
   method: PaymentMethod;
   amount: number;

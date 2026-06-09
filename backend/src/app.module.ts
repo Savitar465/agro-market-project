@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { SellersModule } from './sellers/sellers.module';
 import { CartModule } from './cart/cart.module';
 import { PaymentsModule } from './payments/payments.module';
+import { OrdersModule } from './orders/orders.module';
 import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { UploadsModule } from './uploads/uploads.module';
     SellersModule,
     CartModule,
     PaymentsModule,
+    OrdersModule,
     AuthModule,
     UploadsModule,
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),

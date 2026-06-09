@@ -6,8 +6,18 @@ export type PaymentMethod = "card" | "qr";
 
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
 
+export type ShippingDetails = {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+};
+
 export type CheckoutSessionResult = {
   paymentId: string;
+  orderId: string;
   sessionId: string | null;
   url: string;
   method: PaymentMethod;
@@ -19,6 +29,7 @@ export type CheckoutSessionResult = {
 
 export type PaymentStatusResult = {
   paymentId: string;
+  orderId: string | null;
   status: PaymentStatus;
   method: PaymentMethod;
   amount: number;
@@ -28,11 +39,15 @@ export type PaymentStatusResult = {
 
 export async function createCheckoutSession(
   method: PaymentMethod,
+  shipping?: ShippingDetails,
 ): Promise<CheckoutSessionResult> {
-  return apiRequest<CheckoutSessionResult>(`${PAYMENTS_PATH}/checkout-session`, {
-    method: "POST",
-    body: JSON.stringify({ method }),
-  });
+  return apiRequest<CheckoutSessionResult>(
+    `${PAYMENTS_PATH}/checkout-session`,
+    {
+      method: "POST",
+      body: JSON.stringify({ method, shipping }),
+    },
+  );
 }
 
 export async function getPaymentStatus(

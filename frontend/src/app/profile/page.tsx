@@ -20,9 +20,9 @@ const CONSUMER_LINKS: QuickLink[] = [
     description: "Revisa los productos que vas a comprar.",
   },
   {
-    href: "/checkout",
-    label: "Finalizar compra",
-    description: "Completa tu pedido.",
+    href: "/orders",
+    label: "Mis pedidos",
+    description: "Consulta el historial y estado de tus compras.",
   },
 ];
 
@@ -36,6 +36,11 @@ const PRODUCER_LINKS: QuickLink[] = [
     href: "/sell",
     label: "Publicar producto",
     description: "Agrega un nuevo producto a la venta.",
+  },
+  {
+    href: "/orders/sales",
+    label: "Pedidos recibidos",
+    description: "Gestiona y actualiza el estado de tus ventas.",
   },
   {
     href: "/sellers/create",
@@ -54,6 +59,11 @@ const ADMIN_LINKS: QuickLink[] = [
     href: "/inventory",
     label: "Inventario",
     description: "Supervisa los productos de la plataforma.",
+  },
+  {
+    href: "/orders/sales",
+    label: "Pedidos",
+    description: "Supervisa y actualiza el estado de todos los pedidos.",
   },
 ];
 

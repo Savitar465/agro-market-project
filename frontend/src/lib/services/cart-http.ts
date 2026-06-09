@@ -65,15 +65,3 @@ export async function clearCart(): Promise<CartResponse> {
     method: "DELETE",
   });
 }
-
-export async function checkoutCart(): Promise<{
-  message: string;
-  orderId?: string;
-}> {
-  return apiRequest<{ message: string; orderId?: string }>(
-    `${CART_PATH}/checkout`,
-    {
-      method: "POST",
-    },
-  );
-}

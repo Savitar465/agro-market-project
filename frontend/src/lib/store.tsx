@@ -15,7 +15,6 @@ import {
 } from "@/lib/services/products-http";
 import {
     addCartItem as addCartItemRequest,
-    checkoutCart as checkoutCartRequest,
     clearCart as clearCartRequest,
     getOpenCart as getOpenCartRequest,
     removeCartItem as removeCartItemRequest,
@@ -59,7 +58,6 @@ export type StoreState = {
     removeFromCart: (itemId: string) => Promise<void>;
     updateCartQty: (itemId: string, qty: number) => Promise<void>;
     clearCart: () => Promise<void>;
-    checkout: () => Promise<void>;
     userCoords: Coordinates | null;
     setUserCoords: (coords: Coordinates | null) => void;
 };
@@ -335,24 +333,6 @@ export function StoreProvider({
         }
     }, [isAuthenticated]);
 
-    const checkout = useCallback(async () => {
-        if (!isAuthenticated) {
-            alert("Please login to checkout");
-            return;
-        }
-
-        try {
-            await checkoutCartRequest();
-            setCart([]);
-            setCartTotal(0);
-            await refreshProducts();
-        } catch (error) {
-            alert(
-                error instanceof Error ? error.message : "Unable to complete checkout",
-            );
-        }
-    }, [isAuthenticated, refreshProducts]);
-
     const value = useMemo<StoreState>(
         () => ({
             products,
@@ -380,11 +360,10 @@ export function StoreProvider({
             removeFromCart,
             updateCartQty,
             clearCart,
-            checkout,
             userCoords,
             setUserCoords,
         }),
-        [products, refreshProducts, addProduct, updateProduct, deleteProduct, updateStock, setProductStatus, inventory, refreshInventory, sellers, refreshSellers, addSeller, cart, refreshCart, addToCart, removeFromCart, updateCartQty, clearCart, checkout, userCoords],
+        [products, refreshProducts, addProduct, updateProduct, deleteProduct, updateStock, setProductStatus, inventory, refreshInventory, sellers, refreshSellers, addSeller, cart, refreshCart, addToCart, removeFromCart, updateCartQty, clearCart, userCoords],
     );
 
     return (

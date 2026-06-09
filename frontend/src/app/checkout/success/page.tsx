@@ -1,14 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useStore } from "@/lib/store";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { formatCurrency } from "@/lib/format";
 import {
-  type PaymentStatusResult,
   getPaymentStatus,
+  type PaymentStatusResult,
 } from "@/lib/services/payments-http";
+import { useStore } from "@/lib/store";
 
 type Shipping = {
   email?: string;
@@ -148,7 +148,9 @@ function Confirmation() {
           <div className="border-t border-gray-100 pt-3">
             <dt className="text-gray-500">Shipping to</dt>
             <dd className="mt-1 font-medium text-gray-900">
-              {[shipping.firstName, shipping.lastName].filter(Boolean).join(" ")}
+              {[shipping.firstName, shipping.lastName]
+                .filter(Boolean)
+                .join(" ")}
               {shipping.address ? `, ${shipping.address}` : ""}
               {shipping.city ? `, ${shipping.city}` : ""}
               {shipping.postalCode ? ` ${shipping.postalCode}` : ""}
@@ -157,19 +159,31 @@ function Confirmation() {
         )}
       </dl>
 
-      <Link
-        href="/store"
-        className="mt-8 inline-block rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700"
-      >
-        Continue shopping
-      </Link>
+      <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        {payment.orderId && (
+          <Link
+            href={`/orders/${payment.orderId}`}
+            className="inline-block rounded-md bg-indigo-600 px-6 py-3 text-base font-medium text-white hover:bg-indigo-700"
+          >
+            View order
+          </Link>
+        )}
+        <Link
+          href="/store"
+          className="inline-block rounded-md border border-gray-300 px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Continue shopping
+        </Link>
+      </div>
     </div>
   );
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="text-center text-gray-500">Loading…</div>}>
+    <Suspense
+      fallback={<div className="text-center text-gray-500">Loading…</div>}
+    >
       <Confirmation />
     </Suspense>
   );

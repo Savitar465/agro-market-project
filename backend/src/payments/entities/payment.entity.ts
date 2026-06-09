@@ -20,6 +20,10 @@ export class Payment extends BaseEntity {
   @Column({ type: 'uuid' })
   cartId: string;
 
+  // The order this payment settles. Set right after the order is created.
+  @Column({ type: 'uuid', nullable: true })
+  orderId?: string | null;
+
   // 'stripe' for real Stripe sessions, 'mock' for the no-credentials dev flow.
   @Column({ type: 'varchar', length: 20, default: 'stripe' })
   provider: string;

@@ -8,8 +8,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CART_SERVICE } from '../../common/tokens';
+import { CART_SERVICE, ORDERS_SERVICE } from '../../common/tokens';
 import { ICartService } from '../../cart/services/cart.service.interface';
+import { IOrdersService } from '../../orders/services/orders.service.interface';
 import { Payment } from '../entities/payment.entity';
 import { PaymentMethod, PaymentStatus } from '../entities/payment-status.enum';
 import { CreateCheckoutSessionDto } from '../dto/create-checkout-session.dto';
@@ -31,6 +32,8 @@ export class PaymentsService implements IPaymentsService {
     private readonly paymentRepo: Repository<Payment>,
     @Inject(CART_SERVICE)
     private readonly cartService: ICartService,
+    @Inject(ORDERS_SERVICE)
+    private readonly ordersService: IOrdersService,
     private readonly stripe: StripeService,
   ) {}
 
@@ -51,9 +54,19 @@ export class PaymentsService implements IPaymentsService {
     const currency = this.config.currency;
     const method = dto.method ?? PaymentMethod.CARD;
 
+    // Place the order first (PENDING_PAYMENT) so the purchase is recorded even
+    // if the buyer abandons the payment; it settles once the payment is paid.
+    const order = await this.ordersService.createFromCart(
+      userId,
+      cart,
+      currency,
+      dto.shipping ?? null,
+    );
+
     const payment = this.paymentRepo.create({
       userId,
       cartId: cart.id,
+      orderId: order.id,
       provider: this.stripe.isMock ? 'mock' : 'stripe',
       method,
       status: PaymentStatus.PENDING,
@@ -63,6 +76,7 @@ export class PaymentsService implements IPaymentsService {
       lastChangedBy: userId,
     });
     await this.paymentRepo.save(payment);
+    await this.ordersService.attachPayment(order.id, payment.id);
 
     const successUrl = `${this.config.frontendUrl}/checkout/success?payment=${payment.id}`;
     const cancelUrl = `${this.config.frontendUrl}/cart`;
@@ -98,6 +112,7 @@ export class PaymentsService implements IPaymentsService {
 
     return {
       paymentId: payment.id,
+      orderId: order.id,
       sessionId: payment.sessionId,
       url: checkoutUrl,
       method,
@@ -179,6 +194,7 @@ export class PaymentsService implements IPaymentsService {
             { id: paymentId, status: PaymentStatus.PENDING },
             { status: PaymentStatus.CANCELED },
           );
+          await this.ordersService.cancelByPaymentId(paymentId);
         }
         break;
       }
@@ -217,11 +233,15 @@ export class PaymentsService implements IPaymentsService {
     payment.paidAt = new Date();
     payment.lastChangedBy = payment.userId;
     await this.paymentRepo.save(payment);
+
+    // Confirm the order so it shows as PAID in the buyer's history.
+    await this.ordersService.markPaidByPaymentId(payment.id);
   }
 
   private toStatus(payment: Payment): PaymentStatusResult {
     return {
       paymentId: payment.id,
+      orderId: payment.orderId ?? null,
       status: payment.status,
       method: payment.method,
       amount: Number(payment.amount),

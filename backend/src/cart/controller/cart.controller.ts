@@ -71,11 +71,4 @@ export class CartController {
   clear(@Request() req: any) {
     return this.cartService.clear(req.user.sub);
   }
-
-  @Post('checkout')
-  @ApiOperation({ summary: 'Checkout active cart and discount stock' })
-  @ApiResponse({ status: 200, description: 'Checkout completed' })
-  checkout(@Request() req: any) {
-    return this.cartService.checkout(req.user.sub);
-  }
 }

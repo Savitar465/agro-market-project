@@ -1,20 +1,20 @@
 "use client";
 
-import { useStore } from "@/lib/store";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { forwardRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type React from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { formatCurrency } from "@/lib/format";
 import QrCode from "@/components/payments/QrCode";
+import { formatCurrency } from "@/lib/format";
 import {
   type CheckoutSessionResult,
-  type PaymentMethod,
   confirmMockPayment,
   createCheckoutSession,
   getPaymentStatus,
+  type PaymentMethod,
 } from "@/lib/services/payments-http";
+import { useStore } from "@/lib/store";
 
 type ShippingForm = {
   email: string;
@@ -101,7 +101,7 @@ export default function Page() {
   const onSubmit = handleSubmit(async (shipping) => {
     setError(null);
     try {
-      const result = await createCheckoutSession(method);
+      const result = await createCheckoutSession(method, shipping);
       storeShipping(result.paymentId, shipping);
 
       if (method === "qr") {
@@ -128,7 +128,9 @@ export default function Page() {
       await confirmMockPayment(session.paymentId);
       router.push(`/checkout/success?payment=${session.paymentId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not confirm payment");
+      setError(
+        err instanceof Error ? err.message : "Could not confirm payment",
+      );
     }
   };
 
@@ -148,9 +150,14 @@ export default function Page() {
       className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16"
     >
       <div>
-        <h2 className="text-lg font-medium text-gray-900">Contact information</h2>
+        <h2 className="text-lg font-medium text-gray-900">
+          Contact information
+        </h2>
         <div className="mt-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email address
           </label>
           <input
@@ -160,7 +167,10 @@ export default function Page() {
             className={inputClass}
             {...register("email", {
               required: "Email is required",
-              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email" },
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Invalid email",
+              },
             })}
           />
           {errors.email && (
@@ -206,7 +216,9 @@ export default function Page() {
           />
         </div>
 
-        <h2 className="mt-8 text-lg font-medium text-gray-900">Payment method</h2>
+        <h2 className="mt-8 text-lg font-medium text-gray-900">
+          Payment method
+        </h2>
         <div className="mt-4 space-y-3">
           <MethodOption
             value="card"
