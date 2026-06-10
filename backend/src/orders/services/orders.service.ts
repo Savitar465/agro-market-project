@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ORDERS_REPOSITORY, SELLERS_SERVICE } from '../../common/tokens';
-import { IOrdersRepository } from '../repositories/orders.repository.interface';
+import {
+  IOrdersRepository,
+  OrderDateRange,
+} from '../repositories/orders.repository.interface';
+import { OrdersQueryDto } from '../dto/orders-query.dto';
 import { IOrdersService } from './orders.service.interface';
 import { Cart } from '../../cart/entities/cart.entity';
 import { Order, OrderShipping } from '../entities/order.entity';
@@ -61,8 +65,8 @@ export class OrdersService implements IOrdersService {
     await this.repo.setStatus(order.id, OrderStatus.CANCELED, order.userId);
   }
 
-  findMine(userId: string): Promise<Order[]> {
-    return this.repo.findByUser(userId);
+  findMine(userId: string, query?: OrdersQueryDto): Promise<Order[]> {
+    return this.repo.findByUser(userId, this.toDateRange(query));
   }
 
   async findOneForUser(userId: string, orderId: string): Promise<Order> {
@@ -73,9 +77,13 @@ export class OrdersService implements IOrdersService {
     return order;
   }
 
-  async findSales(user: AuthenticatedUser): Promise<Order[]> {
+  async findSales(
+    user: AuthenticatedUser,
+    query?: OrdersQueryDto,
+  ): Promise<Order[]> {
+    const range = this.toDateRange(query);
     if (this.isAdmin(user)) {
-      return this.repo.findAll();
+      return this.repo.findAll(range);
     }
 
     const seller = await this.sellersService.findByUserId(user.sub);
@@ -84,7 +92,26 @@ export class OrdersService implements IOrdersService {
         'You need a seller profile to view incoming orders',
       );
     }
-    return this.repo.findBySellerId(seller.id);
+    return this.repo.findBySellerId(seller.id, range);
+  }
+
+  private toDateRange(query?: OrdersQueryDto): OrderDateRange | undefined {
+    if (!query?.from && !query?.to) {
+      return undefined;
+    }
+    const range: OrderDateRange = {};
+    if (query.from) {
+      range.from = new Date(query.from);
+    }
+    if (query.to) {
+      const to = new Date(query.to);
+      // A date-only upper bound is inclusive of that whole day.
+      if (/^\d{4}-\d{2}-\d{2}$/.test(query.to)) {
+        to.setUTCHours(23, 59, 59, 999);
+      }
+      range.to = to;
+    }
+    return range;
   }
 
   async updateStatus(

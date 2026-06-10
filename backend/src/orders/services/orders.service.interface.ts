@@ -2,6 +2,7 @@ import { Cart } from '../../cart/entities/cart.entity';
 import { Order, OrderShipping } from '../entities/order.entity';
 import { OrderStatus } from '../entities/order-status.enum';
 import { AuthenticatedUser } from '../../common/types/authenticated-user';
+import { OrdersQueryDto } from '../dto/orders-query.dto';
 
 export interface IOrdersService {
   /**
@@ -25,13 +26,13 @@ export interface IOrdersService {
   cancelByPaymentId(paymentId: string): Promise<void>;
 
   /** Order history for the authenticated buyer, newest first. */
-  findMine(userId: string): Promise<Order[]>;
+  findMine(userId: string, query?: OrdersQueryDto): Promise<Order[]>;
 
   /** A single order owned by the buyer (status + confirmation details). */
   findOneForUser(userId: string, orderId: string): Promise<Order>;
 
   /** Orders containing products of the authenticated seller (or all, admin). */
-  findSales(user: AuthenticatedUser): Promise<Order[]>;
+  findSales(user: AuthenticatedUser, query?: OrdersQueryDto): Promise<Order[]>;
 
   /** Advances the fulfillment status (seller/admin only). */
   updateStatus(

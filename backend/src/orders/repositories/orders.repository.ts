@@ -1,11 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import {
+  Between,
+  FindOperator,
+  FindOptionsWhere,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Not,
+  Repository,
+} from 'typeorm';
 import { Order, OrderShipping } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 import { Cart } from '../../cart/entities/cart.entity';
 import { OrderStatus } from '../entities/order-status.enum';
-import { IOrdersRepository } from './orders.repository.interface';
+import {
+  IOrdersRepository,
+  OrderDateRange,
+} from './orders.repository.interface';
 
 const ORDER_RELATIONS = [
   'items',
@@ -104,9 +116,18 @@ export class OrdersRepository implements IOrdersRepository {
     });
   }
 
-  findByUser(userId: string): Promise<Order[]> {
+  findByUser(userId: string, range?: OrderDateRange): Promise<Order[]> {
+    const where: FindOptionsWhere<Order> = {
+      userId,
+      isActive: true,
+      isArchived: false,
+    };
+    const created = this.createdWithin(range);
+    if (created) {
+      where.createDateTime = created;
+    }
     return this.orderRepo.find({
-      where: { userId, isActive: true, isArchived: false },
+      where,
       relations: ORDER_RELATIONS,
       order: { createDateTime: 'DESC' },
     });
@@ -119,7 +140,10 @@ export class OrdersRepository implements IOrdersRepository {
     });
   }
 
-  async findBySellerId(sellerId: string): Promise<Order[]> {
+  async findBySellerId(
+    sellerId: string,
+    range?: OrderDateRange,
+  ): Promise<Order[]> {
     // Distinct orders that contain at least one line owned by this seller,
     // excluding the orders that were never paid.
     const ids = await this.itemRepo
@@ -136,19 +160,48 @@ export class OrdersRepository implements IOrdersRepository {
       return [];
     }
 
+    const where: FindOptionsWhere<Order> = {
+      id: In(ids.map((row) => row.orderId)),
+    };
+    const created = this.createdWithin(range);
+    if (created) {
+      where.createDateTime = created;
+    }
     return this.orderRepo.find({
-      where: { id: In(ids.map((row) => row.orderId)) },
+      where,
       relations: ORDER_RELATIONS,
       order: { createDateTime: 'DESC' },
     });
   }
 
-  findAll(): Promise<Order[]> {
+  findAll(range?: OrderDateRange): Promise<Order[]> {
+    const where: FindOptionsWhere<Order> = {
+      status: Not(OrderStatus.PENDING_PAYMENT),
+    };
+    const created = this.createdWithin(range);
+    if (created) {
+      where.createDateTime = created;
+    }
     return this.orderRepo.find({
-      where: { status: Not(OrderStatus.PENDING_PAYMENT) },
+      where,
       relations: ORDER_RELATIONS,
       order: { createDateTime: 'DESC' },
     });
+  }
+
+  private createdWithin(
+    range?: OrderDateRange,
+  ): FindOperator<Date> | undefined {
+    if (range?.from && range?.to) {
+      return Between(range.from, range.to);
+    }
+    if (range?.from) {
+      return MoreThanOrEqual(range.from);
+    }
+    if (range?.to) {
+      return LessThanOrEqual(range.to);
+    }
+    return undefined;
   }
 
   async setStatus(

@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Query,
   Request,
 } from '@nestjs/common';
 import {
@@ -17,6 +18,7 @@ import {
 import { ORDERS_SERVICE } from '../../common/tokens';
 import { IOrdersService } from '../services/orders.service.interface';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
+import { OrdersQueryDto } from '../dto/orders-query.dto';
 import { Roles } from '../../auth/rbac/roles.decorator';
 import { Role } from '../../auth/rbac/role.enum';
 import { AuthenticatedUser } from '../../common/types/authenticated-user';
@@ -33,8 +35,11 @@ export class OrdersController {
   @Get()
   @ApiOperation({ summary: 'Order history of the authenticated buyer' })
   @ApiResponse({ status: 200, description: 'Orders returned, newest first' })
-  findMine(@Request() req: { user: AuthenticatedUser }) {
-    return this.ordersService.findMine(req.user.sub);
+  findMine(
+    @Request() req: { user: AuthenticatedUser },
+    @Query() query: OrdersQueryDto,
+  ) {
+    return this.ordersService.findMine(req.user.sub, query);
   }
 
   @Get('sales')
@@ -43,8 +48,11 @@ export class OrdersController {
     summary: 'Incoming orders that include the seller products (admin: all)',
   })
   @ApiResponse({ status: 200, description: 'Sales orders returned' })
-  findSales(@Request() req: { user: AuthenticatedUser }) {
-    return this.ordersService.findSales(req.user);
+  findSales(
+    @Request() req: { user: AuthenticatedUser },
+    @Query() query: OrdersQueryDto,
+  ) {
+    return this.ordersService.findSales(req.user, query);
   }
 
   @Get(':orderId')

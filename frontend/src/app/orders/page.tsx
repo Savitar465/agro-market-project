@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import OrderDateFilter from "@/components/orders/OrderDateFilter";
 import { formatCurrency } from "@/lib/format";
 import {
   getMyOrders,
@@ -13,12 +14,19 @@ import {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const hasDateFilter = Boolean(from || to);
 
   useEffect(() => {
     let active = true;
+    setError(null);
     (async () => {
       try {
-        const data = await getMyOrders();
+        const data = await getMyOrders({
+          from: from || undefined,
+          to: to || undefined,
+        });
         if (active) setOrders(data);
       } catch (err) {
         if (active) {
@@ -33,7 +41,7 @@ export default function OrdersPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [from, to]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -42,6 +50,13 @@ export default function OrdersPage() {
         Historial de tus compras y el estado de cada pedido.
       </p>
 
+      <OrderDateFilter
+        from={from}
+        to={to}
+        onFromChange={setFrom}
+        onToChange={setTo}
+      />
+
       {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
       {orders === null && !error ? (
@@ -49,15 +64,21 @@ export default function OrdersPage() {
       ) : null}
 
       {orders && orders.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="text-gray-600">Todavía no tienes pedidos.</p>
-          <Link
-            href="/store"
-            className="mt-4 inline-block rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            Explorar la tienda
-          </Link>
-        </div>
+        hasDateFilter ? (
+          <p className="mt-8 text-gray-600">
+            No hay pedidos en el rango de fechas seleccionado.
+          </p>
+        ) : (
+          <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-8 text-center">
+            <p className="text-gray-600">Todavía no tienes pedidos.</p>
+            <Link
+              href="/store"
+              className="mt-4 inline-block rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Explorar la tienda
+            </Link>
+          </div>
+        )
       ) : null}
 
       <ul className="mt-6 space-y-4">
