@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type {Coordinates, Product} from '@/data/products'
-import {calculateDistance} from '@/lib/geo'
+import {calculateDistance, formatDistance} from '@/lib/geo'
 
 type ProductCardProps = {
     product: Product
@@ -10,9 +10,12 @@ type ProductCardProps = {
 }
 
 export default function ProductCard({product, userCoords}: ProductCardProps) {
-    const distance = userCoords && product.seller?.coords
-        ? calculateDistance(userCoords, product.seller.coords)
-        : null
+    // Prefer the backend-computed distance; fall back to a local calculation
+    // when the product came from an endpoint without coordinates.
+    const distance = product.distanceKm
+        ?? (userCoords && product.seller?.coords
+            ? calculateDistance(userCoords, product.seller.coords)
+            : null)
 
     return (
         <Link href={`/products/${product.id}`} className="group">
@@ -42,7 +45,7 @@ export default function ProductCard({product, userCoords}: ProductCardProps) {
                         {product.unit && <span className="ml-1 text-xs font-normal text-gray-500">{product.unit}</span>}
                     </p>
                     {distance !== null && (
-                        <p className="text-xs text-gray-500">{distance.toFixed(1)} km away</p>
+                        <p className="text-xs text-gray-500">📍 a {formatDistance(distance)}</p>
                     )}
                 </div>
                 {product.stock !== undefined && (

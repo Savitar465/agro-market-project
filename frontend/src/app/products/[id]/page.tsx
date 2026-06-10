@@ -4,7 +4,7 @@ import {useStore} from '@/lib/store'
 import {useRouter} from 'next/navigation'
 import {useState, use} from 'react'
 import Link from 'next/link'
-import {calculateDistance} from '@/lib/geo'
+import {calculateDistance, formatDistance} from '@/lib/geo'
 import dynamic from 'next/dynamic'
 
 const Map = dynamic(() => import('@/components/map/Map'), { 
@@ -154,7 +154,7 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
                                     <p className="text-sm text-gray-600">{product.seller.location}</p>
                                     {distance !== null && (
                                         <p className="mt-1 text-sm font-medium text-indigo-600">
-                                            {distance} km from your location
+                                            📍 a {formatDistance(distance)} de tu ubicación
                                         </p>
                                     )}
                                 </div>
@@ -163,13 +163,16 @@ export default function Page({params}: { params: Promise<{ id: string }> }) {
 
                         {product.seller?.coords && (
                             <div className="mt-6 h-64 w-full rounded-lg overflow-hidden border border-gray-200">
-                                <Map 
-                                    center={[product.seller.coords.lat, product.seller.coords.lng]} 
+                                <Map
+                                    center={[product.seller.coords.lat, product.seller.coords.lng]}
                                     zoom={12}
                                     markers={[{
                                         position: [product.seller.coords.lat, product.seller.coords.lng],
-                                        label: product.seller.name
+                                        label: product.seller.name,
+                                        href: `/sellers/${product.seller.id}`
                                     }]}
+                                    userPosition={userCoords ? [userCoords.lat, userCoords.lng] : null}
+                                    fitToMarkers={Boolean(userCoords)}
                                 />
                             </div>
                         )}

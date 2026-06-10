@@ -11,3 +11,11 @@ export function calculateDistance(coord1: Coordinates, coord2: Coordinates): num
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+/** Human-readable distance: "850 m" under 1 km, otherwise "12.3 km". */
+export function formatDistance(km: number): string {
+  if (km < 1) {
+    return `${Math.round(km * 1000)} m`;
+  }
+  return `${km.toFixed(1)} km`;
+}

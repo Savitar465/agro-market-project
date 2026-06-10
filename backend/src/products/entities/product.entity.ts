@@ -34,4 +34,9 @@ export class Product extends BaseEntity {
   seller?: Seller;
   @Column({ type: 'uuid', nullable: true })
   sellerId?: string;
+  /**
+   * Distance in km from the caller's coordinates to the seller, computed at
+   * query time when lat/lng filters are provided. Not persisted.
+   */
+  distanceKm?: number;
 }

@@ -3,11 +3,17 @@
 import {useStore} from '@/lib/store'
 import Link from 'next/link'
 import {useSearchParams} from 'next/navigation'
-import {categories} from '@/data/products'
+import {categories, type Product} from '@/data/products'
 import {calculateDistance} from '@/lib/geo'
+import {searchProducts} from '@/lib/services/products-http'
 import {useEffect, useMemo, useState} from 'react'
 import dynamic from 'next/dynamic'
 import ProductCard from '@/components/products/ProductCard'
+
+// Radius options (km) for the "within X km" filter.
+const RADIUS_OPTIONS = [5, 10, 25, 50, 100, 250]
+// The "Cerca de ti" rail only shows products within this many km.
+const NEARBY_RADIUS_KM = 100
 
 const Map = dynamic(() => import('@/components/map/Map'), {
     ssr: false,
@@ -15,7 +21,7 @@ const Map = dynamic(() => import('@/components/map/Map'), {
 })
 
 export default function Page() {
-    const {products, productsLoading, productsError, userCoords, setUserCoords} = useStore()
+    const {products, productsLoading, productsError, userCoords, requestUserLocation, locationLoading, locationError} = useStore()
     const searchParams = useSearchParams()
 
     // Filters are kept in local state so they combine and update instantly
@@ -25,7 +31,9 @@ export default function Page() {
     const [category, setCategory] = useState('')
     const [sellerId, setSellerId] = useState('')
     const [sortByProximity, setSortByProximity] = useState(false)
+    const [maxDistanceKm, setMaxDistanceKm] = useState<number | ''>('')
     const [showMap, setShowMap] = useState(false)
+    const [nearbyProducts, setNearbyProducts] = useState<Product[]>([])
 
     useEffect(() => {
         setQuery(searchParams.get('q') ?? '')
@@ -33,23 +41,41 @@ export default function Page() {
         setSellerId(searchParams.get('seller') ?? '')
     }, [searchParams])
 
-    useEffect(() => {
-        if (sortByProximity && !userCoords) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setUserCoords({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    })
-                },
-                (error) => {
-                    console.error("Error getting location", error)
-                    alert("Unable to retrieve your location")
-                    setSortByProximity(false)
-                }
-            )
+    const toggleProximity = async () => {
+        if (sortByProximity) {
+            setSortByProximity(false)
+            return
         }
-    }, [sortByProximity, userCoords, setUserCoords])
+        const coords = userCoords ?? await requestUserLocation()
+        if (coords) setSortByProximity(true)
+    }
+
+    // "Cerca de ti": distance is computed server-side (Haversine in SQL) and
+    // comes back as distanceKm on each product, sorted nearest-first.
+    useEffect(() => {
+        if (!userCoords) {
+            setNearbyProducts([])
+            return
+        }
+        let active = true
+        searchProducts({
+            lat: userCoords.lat,
+            lng: userCoords.lng,
+            maxDistanceKm: NEARBY_RADIUS_KM,
+            sortBy: 'distance',
+            sortOrder: 'ASC',
+            limit: 4,
+        })
+            .then((items) => {
+                if (active) setNearbyProducts(items)
+            })
+            .catch(() => {
+                if (active) setNearbyProducts([])
+            })
+        return () => {
+            active = false
+        }
+    }, [userCoords])
 
     // The producer list is derived from the catalog so every option yields
     // at least one product.
@@ -80,6 +106,10 @@ export default function Page() {
             if (!haystack.includes(normalizedQuery)) return false
         }
         if (category && p.category !== category) return false
+        if (userCoords && maxDistanceKm !== '') {
+            if (!p.seller?.coords) return false
+            if (calculateDistance(userCoords, p.seller.coords) > maxDistanceKm) return false
+        }
         return !(sellerId && p.seller?.id !== sellerId)
     })
 
@@ -91,6 +121,33 @@ export default function Page() {
         }
         return 0
     })
+
+    // One marker per producer (products share their seller's coords, so
+    // per-product markers would stack on the same point).
+    const sellerMapMarkers = useMemo(() => {
+        // Plain object instead of Map: the Map identifier is shadowed by the
+        // dynamically imported map component in this module.
+        const bySeller: Record<string, {position: [number, number]; name: string; count: number}> = {}
+        for (const p of sortedProducts) {
+            if (!p.seller?.coords) continue
+            const existing = bySeller[p.seller.id]
+            if (existing) {
+                existing.count += 1
+            } else {
+                bySeller[p.seller.id] = {
+                    position: [p.seller.coords.lat, p.seller.coords.lng],
+                    name: p.seller.name,
+                    count: 1,
+                }
+            }
+        }
+        return Object.entries(bySeller).map(([id, s]) => ({
+            id,
+            position: s.position,
+            label: `${s.name} — ${s.count} producto${s.count === 1 ? '' : 's'}`,
+            href: `/sellers/${id}`,
+        }))
+    }, [sortedProducts])
 
     const clearFilters = () => {
         setQuery('')
@@ -118,11 +175,25 @@ export default function Page() {
                         {showMap ? 'Show List' : 'Show Map'}
                     </button>
                     <button
-                        onClick={() => setSortByProximity(!sortByProximity)}
-                        className={`text-sm font-medium px-3 py-1.5 rounded-md border ${sortByProximity ? 'bg-indigo-100 border-indigo-600 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:text-gray-900'}`}
+                        onClick={toggleProximity}
+                        disabled={locationLoading}
+                        className={`text-sm font-medium px-3 py-1.5 rounded-md border disabled:opacity-50 ${sortByProximity ? 'bg-indigo-100 border-indigo-600 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:text-gray-900'}`}
                     >
-                        {sortByProximity ? 'Sorted by Proximity' : 'Sort by Proximity'}
+                        {locationLoading ? 'Obteniendo ubicación…' : sortByProximity ? '✓ Ordenado por cercanía' : 'Ordenar por cercanía'}
                     </button>
+                    {userCoords && (
+                        <select
+                            value={maxDistanceKm}
+                            onChange={(e) => setMaxDistanceKm(e.target.value === '' ? '' : Number(e.target.value))}
+                            className="text-sm font-medium px-3 py-1.5 rounded-md border bg-white border-gray-300 text-gray-500 focus:border-indigo-500 focus:outline-none"
+                            aria-label="Filtrar por distancia máxima"
+                        >
+                            <option value="">Cualquier distancia</option>
+                            {RADIUS_OPTIONS.map((km) => (
+                                <option key={km} value={km}>Hasta {km} km</option>
+                            ))}
+                        </select>
+                    )}
                     <Link
                         href="/sell"
                         className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -131,6 +202,10 @@ export default function Page() {
                     </Link>
                 </div>
             </div>
+
+            {locationError && (
+                <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{locationError}</p>
+            )}
 
             {/* Search + producer filter */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
@@ -189,17 +264,28 @@ export default function Page() {
                     <Map
                         center={userCoords ? [userCoords.lat, userCoords.lng] : [39.8283, -98.5795]}
                         zoom={userCoords ? 10 : 4}
-                        markers={sortedProducts
-                            .filter(p => p.seller?.coords)
-                            .map(p => ({
-                                position: [p.seller!.coords!.lat, p.seller!.coords!.lng] as [number, number],
-                                label: `${p.name} - $${p.price.toFixed(2)} - ${p.seller!.name}`,
-                                id: p.id
-                            }))}
+                        markers={sellerMapMarkers}
+                        userPosition={userCoords ? [userCoords.lat, userCoords.lng] : null}
+                        fitToMarkers={sellerMapMarkers.length > 0}
                     />
                 </div>
             ) : (
                 <>
+                    {/* Nearby products — distance computed by the backend */}
+                    {!hasActiveFilters && nearbyProducts.length > 0 && (
+                        <section className="mb-12">
+                            <div className="flex items-baseline justify-between mb-4">
+                                <h2 className="text-xl font-bold tracking-tight text-gray-900">Cerca de ti</h2>
+                                <span className="text-sm text-gray-500">A menos de {NEARBY_RADIUS_KM} km</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+                                {nearbyProducts.map((product) => (
+                                    <ProductCard key={product.id} product={product} userCoords={userCoords} />
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
                     {/* Featured products — only on the unfiltered feed */}
                     {!hasActiveFilters && featuredProducts.length > 0 && (
                         <section className="mb-12">

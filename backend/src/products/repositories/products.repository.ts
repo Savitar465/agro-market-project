@@ -9,6 +9,16 @@ import { IProductRepository } from './products.repository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+/**
+ * Haversine distance (km) between the caller (:userLat/:userLng) and the
+ * product's seller, computed in SQL over the seller's jsonb coords.
+ * Evaluates to NULL when the seller has no coords stored.
+ */
+const SELLER_DISTANCE_KM = `(6371 * acos(LEAST(1.0, GREATEST(-1.0,
+  cos(radians(:userLat)) * cos(radians((seller.coords->>'lat')::double precision))
+  * cos(radians((seller.coords->>'lng')::double precision) - radians(:userLng))
+  + sin(radians(:userLat)) * sin(radians((seller.coords->>'lat')::double precision))))))`;
+
 @Injectable()
 export class ProductsRepository implements IProductRepository {
   constructor(
@@ -51,11 +61,16 @@ export class ProductsRepository implements IProductRepository {
       minRating,
       minStock,
       unit,
+      lat,
+      lng,
+      maxDistanceKm,
       sortBy = 'createDateTime',
       sortOrder = 'DESC',
       page = 1,
       limit = 10,
     } = filters;
+
+    const hasUserCoords = lat !== undefined && lng !== undefined;
 
     const queryBuilder = this.repo.createQueryBuilder('product');
     queryBuilder.leftJoinAndSelect('product.seller', 'seller');
@@ -95,14 +110,48 @@ export class ProductsRepository implements IProductRepository {
       queryBuilder.andWhere('LOWER(product.unit) = LOWER(:unit)', { unit });
     }
 
-    const sortField = this.resolveSortField(sortBy);
-    queryBuilder.orderBy(`product.${sortField}`, sortOrder);
+    if (hasUserCoords) {
+      queryBuilder.addSelect(SELLER_DISTANCE_KM, 'distance_km');
+      queryBuilder.setParameters({ userLat: lat, userLng: lng });
+      if (maxDistanceKm !== undefined) {
+        // NULL distances (sellers without coords) never satisfy <=, so they
+        // are excluded whenever a radius is requested.
+        queryBuilder.andWhere(`${SELLER_DISTANCE_KM} <= :maxDistanceKm`, {
+          maxDistanceKm,
+        });
+      }
+    }
+
+    if (sortBy === 'distance' && hasUserCoords) {
+      queryBuilder.orderBy(SELLER_DISTANCE_KM, sortOrder, 'NULLS LAST');
+    } else {
+      const sortField = this.resolveSortField(sortBy);
+      queryBuilder.orderBy(`product.${sortField}`, sortOrder);
+    }
 
     const total = await queryBuilder.getCount();
-    queryBuilder.skip((page - 1) * limit).take(limit);
-    const data = await queryBuilder.getMany();
+    // The only join is many-to-one, so raw offset/limit paginates entities
+    // correctly and keeps the distance select usable in ORDER BY.
+    queryBuilder.offset((page - 1) * limit).limit(limit);
 
-    return { data, total, page, limit };
+    if (!hasUserCoords) {
+      const data = await queryBuilder.getMany();
+      return { data, total, page, limit };
+    }
+
+    const { entities, raw } = await queryBuilder.getRawAndEntities();
+    const distanceById = new Map<string, unknown>(
+      raw.map((row) => [row.product_id, row.distance_km]),
+    );
+    for (const product of entities) {
+      const distance = distanceById.get(product.id);
+      product.distanceKm =
+        distance === null || distance === undefined
+          ? undefined
+          : Math.round(Number(distance) * 100) / 100;
+    }
+
+    return { data: entities, total, page, limit };
   }
 
   async findBySeller(

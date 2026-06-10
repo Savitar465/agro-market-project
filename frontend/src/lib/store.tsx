@@ -60,7 +60,40 @@ export type StoreState = {
     clearCart: () => Promise<void>;
     userCoords: Coordinates | null;
     setUserCoords: (coords: Coordinates | null) => void;
+    locationLoading: boolean;
+    locationError: string | null;
+    requestUserLocation: () => Promise<Coordinates | null>;
 };
+
+const USER_COORDS_STORAGE_KEY = "agro:user-coords";
+
+function readStoredCoords(): Coordinates | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const raw = window.localStorage.getItem(USER_COORDS_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw) as Coordinates;
+        if (typeof parsed?.lat === "number" && typeof parsed?.lng === "number") {
+            return parsed;
+        }
+    } catch {
+        // Corrupt storage entry: ignore and fall through.
+    }
+    return null;
+}
+
+function geolocationErrorMessage(error: GeolocationPositionError): string {
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            return "Permiso de ubicación denegado. Activalo en tu navegador para ver productos cercanos.";
+        case error.POSITION_UNAVAILABLE:
+            return "No se pudo determinar tu ubicación.";
+        case error.TIMEOUT:
+            return "La solicitud de ubicación tardó demasiado. Intentá de nuevo.";
+        default:
+            return "No se pudo obtener tu ubicación.";
+    }
+}
 
 const StoreContext = createContext<StoreState | undefined>(undefined);
 
@@ -79,7 +112,63 @@ export function StoreProvider({
     const [cartTotal, setCartTotal] = useState<number>(0);
     const [cartLoading, setCartLoading] = useState<boolean>(false);
     const [cartError, setCartError] = useState<string | null>(null);
-    const [userCoords, setUserCoords] = useState<Coordinates | null>(null);
+    const [userCoords, setUserCoordsState] = useState<Coordinates | null>(null);
+    const [locationLoading, setLocationLoading] = useState<boolean>(false);
+    const [locationError, setLocationError] = useState<string | null>(null);
+
+    // Restore the last known location so distances render immediately without
+    // re-prompting for the geolocation permission on every visit.
+    useEffect(() => {
+        const stored = readStoredCoords();
+        if (stored) setUserCoordsState(stored);
+    }, []);
+
+    const setUserCoords = useCallback((coords: Coordinates | null) => {
+        setUserCoordsState(coords);
+        try {
+            if (coords) {
+                window.localStorage.setItem(
+                    USER_COORDS_STORAGE_KEY,
+                    JSON.stringify(coords),
+                );
+            } else {
+                window.localStorage.removeItem(USER_COORDS_STORAGE_KEY);
+            }
+        } catch {
+            // Storage unavailable (private mode/quota): location still works in-memory.
+        }
+    }, []);
+
+    const requestUserLocation =
+        useCallback(async (): Promise<Coordinates | null> => {
+            if (typeof navigator === "undefined" || !navigator.geolocation) {
+                setLocationError("Tu navegador no soporta geolocalización.");
+                return null;
+            }
+
+            setLocationLoading(true);
+            setLocationError(null);
+
+            return new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const coords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        setUserCoords(coords);
+                        setLocationLoading(false);
+                        resolve(coords);
+                    },
+                    (error) => {
+                        setLocationError(geolocationErrorMessage(error));
+                        setLocationLoading(false);
+                        resolve(null);
+                    },
+                    {enableHighAccuracy: false, timeout: 10000, maximumAge: 300000},
+                );
+            });
+        }, [setUserCoords]);
 
     const refreshProducts = useCallback(async () => {
         setProductsLoading(true);
@@ -362,8 +451,11 @@ export function StoreProvider({
             clearCart,
             userCoords,
             setUserCoords,
+            locationLoading,
+            locationError,
+            requestUserLocation,
         }),
-        [products, refreshProducts, addProduct, updateProduct, deleteProduct, updateStock, setProductStatus, inventory, refreshInventory, sellers, refreshSellers, addSeller, cart, refreshCart, addToCart, removeFromCart, updateCartQty, clearCart, userCoords],
+        [products, refreshProducts, addProduct, updateProduct, deleteProduct, updateStock, setProductStatus, inventory, refreshInventory, sellers, refreshSellers, addSeller, cart, refreshCart, addToCart, removeFromCart, updateCartQty, clearCart, userCoords, setUserCoords, locationLoading, locationError, requestUserLocation],
     );
 
     return (

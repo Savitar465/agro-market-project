@@ -17,6 +17,8 @@ export type Product = {
   stock?: number;
   rating?: number;
   status?: ProductStatus;
+  /** Distance in km to the seller, computed by the backend when searching with coordinates. */
+  distanceKm?: number;
   seller?: {
     id: string;
     name: string;

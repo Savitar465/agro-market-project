@@ -5,12 +5,18 @@ import {useAuth} from '@/lib/auth/auth-context'
 import {useRouter} from 'next/navigation'
 import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
+import dynamic from 'next/dynamic'
 import {
     createSeller,
     getSellerByUserId,
     updateSeller,
     type SellerProfile,
 } from "@/lib/services/sellers-http";
+
+const LocationPicker = dynamic(() => import('@/components/map/LocationPicker'), {
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-gray-100 animate-pulse flex items-center justify-center">Cargando mapa…</div>
+})
 
 type SellerFormValues = {
     name: string
@@ -19,7 +25,7 @@ type SellerFormValues = {
 
 export default function Page() {
     const {user} = useAuth()
-    const {refreshSellers} = useStore()
+    const {refreshSellers, requestUserLocation, locationLoading, locationError} = useStore()
     const router = useRouter()
     const {register, handleSubmit, reset, formState: {isSubmitting}} = useForm<SellerFormValues>()
 
@@ -54,11 +60,9 @@ export default function Page() {
         }
     }, [user, reset])
 
-    const useMyLocation = () => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => setCoords({lat: position.coords.latitude, lng: position.coords.longitude}),
-            (error) => console.error("Error getting location", error),
-        )
+    const useMyLocation = async () => {
+        const location = await requestUserLocation()
+        if (location) setCoords(location)
     }
 
     const onSubmit = async (data: SellerFormValues) => {
@@ -132,20 +136,29 @@ export default function Page() {
                         </div>
 
                         <div className="sm:col-span-6">
-                            <label className="block text-sm font-medium text-gray-700">Coordenadas</label>
+                            <label className="block text-sm font-medium text-gray-700">Ubicación en el mapa</label>
+                            <p className="mt-1 text-sm text-gray-500">
+                                Hacé clic en el mapa o arrastrá el marcador para fijar dónde están tus productos.
+                                Los compradores verán la distancia hasta vos.
+                            </p>
                             <div className="mt-2 flex items-center gap-3">
                                 <button
                                     type="button"
                                     onClick={useMyLocation}
-                                    className="rounded-md border border-gray-300 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                                    disabled={locationLoading}
+                                    className="rounded-md border border-gray-300 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50"
                                 >
-                                    Usar mi ubicación
+                                    {locationLoading ? 'Obteniendo ubicación…' : 'Usar mi ubicación'}
                                 </button>
                                 <span className="text-sm text-gray-500">
                                     {coords
                                         ? `${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
-                                        : 'Sin coordenadas (opcional, mejora el mapa de tu tienda)'}
+                                        : 'Sin coordenadas (opcional, permite mostrar distancias y el mapa de tu tienda)'}
                                 </span>
+                            </div>
+                            {locationError && <p className="mt-1 text-sm text-red-600">{locationError}</p>}
+                            <div className="mt-3 h-72 w-full overflow-hidden rounded-lg border border-gray-200">
+                                <LocationPicker value={coords} onChange={setCoords} />
                             </div>
                         </div>
                     </div>

@@ -26,6 +26,7 @@ type ApiProduct = Partial<Product> & {
   id?: string;
   status?: ProductStatus;
   sellerId?: string;
+  distanceKm?: number;
   seller?: {
     id?: string;
     name?: string;
@@ -96,6 +97,10 @@ function normalizeProduct(raw: ApiProduct): Product {
     stock: raw.stock !== undefined ? Number(raw.stock) : undefined,
     rating: raw.rating !== undefined ? Number(raw.rating) : undefined,
     status: raw.status,
+    distanceKm:
+      raw.distanceKm !== undefined && raw.distanceKm !== null
+        ? Number(raw.distanceKm)
+        : undefined,
     seller: sellerId
       ? {
           id: sellerId,
@@ -120,6 +125,40 @@ function normalizeListResponse(
 export async function getProducts(): Promise<Product[]> {
   const response = await apiRequest<ApiProduct[] | PaginatedProductsResponse>(
     PRODUCTS_PATH,
+    { method: "GET" },
+  );
+  return normalizeListResponse(response);
+}
+
+export type SearchProductsParams = {
+  name?: string;
+  category?: string;
+  lat?: number;
+  lng?: number;
+  /** Only products whose seller is within this radius (km). Requires lat/lng. */
+  maxDistanceKm?: number;
+  sortBy?: "name" | "price" | "rating" | "createDateTime" | "distance";
+  sortOrder?: "ASC" | "DESC";
+  page?: number;
+  limit?: number;
+};
+
+/**
+ * Server-side product search. When lat/lng are provided the backend computes
+ * each product's distanceKm and supports sortBy=distance / maxDistanceKm.
+ */
+export async function searchProducts(
+  params: SearchProductsParams,
+): Promise<Product[]> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  }
+
+  const response = await apiRequest<PaginatedProductsResponse>(
+    `${PRODUCTS_PATH}/search?${query.toString()}`,
     { method: "GET" },
   );
   return normalizeListResponse(response);
